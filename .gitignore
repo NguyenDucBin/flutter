@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 
+=======
+# Miscellaneous
+*.class
+>>>>>>> a7db0723c76f06e136b69a1441e7d0b83e8316ca
 *.lock
 *.log
 *.pyc
@@ -115,5 +120,9 @@ app.*.symbols
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
+<<<<<<< HEAD
 !/dev/ci/**/Gemfile.lock
 
+=======
+!/dev/ci/**/Gemfile.lock
+>>>>>>> a7db0723c76f06e136b69a1441e7d0b83e8316ca
