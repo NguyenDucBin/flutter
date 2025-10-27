@@ -1,0 +1,38 @@
+name: doanflutter
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0' # Sửa lại dải SDK cho tương thích
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # === Gói lõi ===
+  cupertino_icons: ^1.0.8
+  equatable: ^2.0.7 # Giữ lại, rất tốt cho Entity & State
+  provider: ^6.1.2 # 👈 ĐÃ THÊM (Lõi state management)
+  intl: ^0.19.0 # 👈 ĐÃ THÊM (Cho ngày và tiền tệ)
+
+  # === Gói Firebase ===
+  # (Xóa số phiên bản cũ để lấy bản mới nhất)
+  firebase_core:
+  firebase_auth:
+  cloud_firestore:
+  firebase_storage:     # 👈 ĐÃ THÊM (Cho StorageService)
+  firebase_messaging: # 👈 ĐÃ THÊM (Cho MessagingService)
+
+  # === Gói UI ===
+  fl_chart: ^0.68.0 # 👈 ĐÃ THÊM (Cho ReportsPage)
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

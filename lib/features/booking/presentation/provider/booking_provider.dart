@@ -1,0 +1,113 @@
+import 'package:flutter/foundation.dart';
+import 'package:doanflutter/features/booking/domain/entities/booking_entity.dart';
+import 'package:doanflutter/features/booking/data/models/booking_model.dart';
+import 'package:doanflutter/features/booking/domain/repositories/booking_repository.dart';
+
+class BookingProvider extends ChangeNotifier {
+  final BookingRepository _bookingRepository;
+
+  BookingProvider(this._bookingRepository);
+
+  // Trạng thái cho danh sách booking
+  List<BookingEntity> _myBookings = [];
+  List<BookingEntity> get myBookings => _myBookings;
+  bool _isLoadingList = false;
+  bool get isLoadingList => _isLoadingList;
+
+  // Trạng thái cho việc tạo booking mới
+  bool _isCreatingBooking = false;
+  bool get isCreatingBooking => _isCreatingBooking;
+
+  String? _error;
+  String? get error => _error;
+
+  // Lấy danh sách booking của user
+  Future<void> fetchMyBookings(String userId) async {
+    _isLoadingList = true;
+    _error = null;
+    notifyListeners();
+    try {
+      _myBookings = await _bookingRepository.fetchBookingsForUser(userId);
+    } catch (e) {
+      _error = e.toString();
+    }
+    _isLoadingList = false;
+    notifyListeners();
+  }
+
+  // Tạo một booking mới
+  Future<void> createBooking(BookingEntity booking) async {
+    _isCreatingBooking = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _bookingRepository.createBooking(booking);
+      // Sau khi tạo thành công, tự động tải lại danh sách
+      await fetchMyBookings(booking.userId);
+    } catch (e) {
+      _error = e.toString();
+      // Ném lỗi ra để BookingScreen có thể bắt và hiển thị
+      throw Exception(e);
+    } finally {
+      _isCreatingBooking = false;
+      notifyListeners();
+    }
+  }
+
+  // Trạng thái cho danh sách booking của người quản lý
+  List<BookingEntity> _adminBookings = [];
+  List<BookingEntity> get adminBookings => _adminBookings;
+  
+  bool _isLoadingAdminList = false;
+  bool get isLoadingAdminList => _isLoadingAdminList;
+
+  // Lấy danh sách booking của người quản lý
+  Future<void> fetchBookingsForOwner(String ownerId) async {
+    _isLoadingAdminList = true;
+    _error = null;
+    notifyListeners();
+    
+    try {
+      _adminBookings = await _bookingRepository.fetchBookingsForOwner(ownerId);
+    } catch (e) {
+      _error = e.toString();
+    }
+    
+    _isLoadingAdminList = false;
+    notifyListeners();
+  }
+
+  // Cập nhật trạng thái booking
+  Future<void> updateBookingStatus(String bookingId, String status) async {
+    try {
+      await _bookingRepository.updateBookingStatus(bookingId, status);
+      _updateStatusInList(_myBookings, bookingId, status);
+      _updateStatusInList(_adminBookings, bookingId, status);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      throw Exception(e);
+    }
+  }
+
+  void _updateStatusInList(List<BookingEntity> list, String bookingId, String status) {
+    final index = list.indexWhere((b) => b.bookingId == bookingId);
+    if (index != -1) {
+      final oldBooking = list[index];
+      list[index] = BookingModel(
+        bookingId: oldBooking.bookingId,
+        userId: oldBooking.userId,
+        ownerId: oldBooking.ownerId,
+        hotelId: oldBooking.hotelId,
+        hotelName: oldBooking.hotelName,
+        roomId: oldBooking.roomId,
+        roomType: oldBooking.roomType,
+        checkIn: oldBooking.checkIn,
+        checkOut: oldBooking.checkOut,
+        totalPrice: oldBooking.totalPrice,
+        status: status
+      );
+    }
+  }
+}
