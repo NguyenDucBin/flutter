@@ -36,3 +36,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  # Thêm phần này để khai báo assets
+  assets:
+    - assets/images/ # Khai báo thư mục chứa logo
+    # - assets/ # Hoặc khai báo cả thư mục assets nếu có nhiều loại tài nguyên khác
