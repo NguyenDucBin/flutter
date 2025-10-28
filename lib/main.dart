@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 // --- Core ---
 import 'firebase_options.dart';
 import 'core/router/app_router.dart';
+import 'core/services/storage_service.dart';
 
 // --- Auth Feature ---
 import 'features/auth/domain/repositories/auth_repository.dart';
@@ -40,6 +41,11 @@ import 'features/reports/domain/repositories/report_repository.dart';
 import 'features/reports/data/repositories/report_repository_impl.dart';
 import 'features/reports/presentation/provider/report_provider.dart';
 
+// --- Thêm import cho Review ---
+import 'features/reviews/domain/repositories/review_repository.dart';
+import 'features/reviews/data/repositories/review_repository_impl.dart';
+import 'features/reviews/presentation/provider/review_provider.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -61,6 +67,7 @@ class AppEntry extends StatelessWidget {
         // Cung cấp các instance Firebase cho toàn bộ app
         Provider<FirebaseAuth>(create: (_) => FirebaseAuth.instance),
         Provider<FirebaseFirestore>(create: (_) => FirebaseFirestore.instance),
+        Provider<StorageService>(create: (_) => StorageService()),
 
         // === 2. DATASOURCES ===
         // (Chỉ Auth feature dùng DataSource riêng, các feature khác
@@ -106,6 +113,12 @@ class AppEntry extends StatelessWidget {
           ),
         ),
 
+        Provider<ReviewRepository>(
+          create: (context) => ReviewRepositoryImpl(
+            context.read<FirebaseFirestore>(),
+          ),
+        ),
+
         // === 4. PROVIDERS (ChangeNotifiers cho UI) ===
         // Các Provider này sẽ lấy Repository ở trên để hoạt động
         ChangeNotifierProvider<AuthService>(
@@ -136,6 +149,11 @@ class AppEntry extends StatelessWidget {
         ChangeNotifierProvider<ReportProvider>(
           create: (context) => ReportProvider(
             context.read<ReportRepository>(),
+          ),
+        ),
+        ChangeNotifierProvider<ReviewProvider>(
+          create: (context) => ReviewProvider(
+            context.read<ReviewRepository>(),
           ),
         ),
       ],

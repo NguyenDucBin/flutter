@@ -41,7 +41,14 @@ class _RoomsListPageState extends State<RoomsListPage> {
         icon: const Icon(Icons.add),
         label: const Text('Add Room'),
         onPressed: () {
-          // TODO: Mở trang/dialog Thêm phòng mới
+          Navigator.pushNamed(
+            context,
+            '/add_edit_room',
+            arguments: {
+              'hotelId': widget.hotelId,
+              'room': null, // Thêm mới nên room là null
+            },
+          );
         },
       ),
       body: Padding(
@@ -114,7 +121,14 @@ class _RoomsListPageState extends State<RoomsListPage> {
                               trailing: PopupMenuButton<String>(
                                 onSelected: (value) {
                                   if (value == 'edit') {
-                                    // TODO: Mở trang/dialog Sửa phòng
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/add_edit_room',
+                                      arguments: {
+                                        'hotelId': widget.hotelId,
+                                        'room': room,
+                                      },
+                                    );
                                   } else if (value == 'delete') {
                                     // Gọi provider để xóa
                                     context.read<RoomProvider>().deleteRoom(

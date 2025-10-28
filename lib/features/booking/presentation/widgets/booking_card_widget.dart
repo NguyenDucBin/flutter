@@ -1,9 +1,7 @@
 import 'package:doanflutter/features/booking/domain/entities/booking_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:doanflutter/features/hotel/presentation/provider/hotel_provider.dart';
-import 'package:doanflutter/features/rooms/presentation/provider/room_provider.dart';
+
 
 class BookingCard extends StatelessWidget {
   final BookingEntity booking;
@@ -18,7 +16,7 @@ class BookingCard extends StatelessWidget {
 
     // Lấy tên khách sạn và loại phòng từ Provider
     final hotelName = booking.hotelName;
-    final roomType = context.read<RoomProvider>().getRoomType(booking.roomId) ?? 'Không xác định';
+    final roomType = booking.roomType;
 
     return Card(
       elevation: 2.0,

@@ -27,8 +27,9 @@ dependencies:
 
   # === Gói UI ===
   fl_chart: ^0.68.0 # 👈 ĐÃ THÊM (Cho ReportsPage)
-
-
+  image_picker: ^1.1.2
+  flutter_rating_bar: ^4.0.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

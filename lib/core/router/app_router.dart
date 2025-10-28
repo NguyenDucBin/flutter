@@ -12,6 +12,8 @@ import 'package:doanflutter/features/hotel/presentation/pages/hotel_list_page.da
 import 'package:doanflutter/features/hotel/presentation/pages/hotel_management_page.dart';
 import 'package:doanflutter/features/reports/presentation/pages/reports_page.dart';
 import 'package:doanflutter/features/rooms/presentation/pages/rooms_list_page.dart';
+import 'package:doanflutter/features/rooms/presentation/pages/add_edit_room_page.dart'; 
+import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
 
 class AppRouter {
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -55,6 +57,18 @@ class AppRouter {
           );
         }
         return _errorRoute('Thiếu Hotel ID');
+
+        case '/add_edit_room':
+        if (args is Map) {
+          return MaterialPageRoute(
+            builder: (_) => AddEditRoomPage(
+              hotelId: args['hotelId'] as String,
+              room: args['room'] as RoomEntity?, // Cho phép null
+            ),
+          );
+        }
+        return _errorRoute('Thiếu thông tin Hotel/Room');
+        
       case '/customers':
         return MaterialPageRoute(builder: (_) => const CustomersListPage());
       case '/reports':
