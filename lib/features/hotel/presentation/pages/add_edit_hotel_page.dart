@@ -1,4 +1,5 @@
-import 'dart:io'; 
+import 'package:flutter/foundation.dart'; // kIsWeb
+import 'dart:typed_data'; // Uint8List
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; 
 import 'package:provider/provider.dart';
@@ -66,11 +67,18 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
 
     setState(() => _isUploading = true);
     try {
-      final file = File(image.path);
-      // Dùng StorageService đã inject
       final storageService = context.read<StorageService>();
-      // Tải lên thư mục 'hotels/'
-      final downloadUrl = await storageService.uploadImage(file, 'hotels'); 
+      // Đọc bytes và upload (dùng được cả web/mobile)
+      final Uint8List bytes = await image.readAsBytes();
+      final String name = image.name.isNotEmpty
+          ? image.name
+          : 'img_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      final downloadUrl = await storageService.uploadImageBytes(
+        bytes,
+        'hotels',
+        fileName: name,
+      );
 
       setState(() {
         _imageUrls.add(downloadUrl);
@@ -78,7 +86,7 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi tải ảnh: ${e.toString()}')),
+          SnackBar(content: Text('Lỗi tải ảnh: $e')),
         );
       }
     } finally {
