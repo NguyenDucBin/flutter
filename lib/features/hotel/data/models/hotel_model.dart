@@ -41,9 +41,9 @@ class HotelModel extends HotelEntity {
       description: data['description'] ?? '',
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
       amenities: List<String>.from(data['amenities'] ?? []),
-      minPrice: (data['minPrice'] ?? 0.0).toDouble(),
-      avgRating: (data['avgRating'] ?? 0.0).toDouble(),
-      reviewCount: (data['reviewCount'] ?? 0).toInt(),
+      minPrice: (data['minPrice'] is num ? data['minPrice'] : 0.0).toDouble(),
+      avgRating: (data['avgRating'] is num ? data['avgRating'] : 0.0).toDouble(),
+      reviewCount: (data['reviewCount'] is num ? data['reviewCount'] : 0).toInt(),
     );
   }
 
