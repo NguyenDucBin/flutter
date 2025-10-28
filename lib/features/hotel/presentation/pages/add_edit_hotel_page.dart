@@ -1,12 +1,11 @@
-import 'package:flutter/foundation.dart'; // kIsWeb
-import 'dart:typed_data'; // Uint8List
+// lib/features/hotel/presentation/pages/add_edit_hotel_page.dart
+
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; 
 import 'package:provider/provider.dart';
 import 'package:doanflutter/features/hotel/domain/entities/hotel_entity.dart';
 import 'package:doanflutter/features/hotel/presentation/provider/hotel_provider.dart';
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
-import 'package:doanflutter/core/services/storage_service.dart'; 
+// KHÔNG CẦN import storage_service.dart, image_picker, hoặc dart:typed_data nữa
 
 class AddEditHotelPage extends StatefulWidget {
   final HotelEntity? hotel;
@@ -22,14 +21,14 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
   late final TextEditingController _nameController;
   late final TextEditingController _addressController;
   late final TextEditingController _descriptionController;
+  
+  // Controller mới cho ô nhập URL
+  late final TextEditingController _imageUrlController; 
   bool _isLoading = false;
 
-  late List<String> _imageUrls; // Lưu cả link cũ và link mới
-  late List<String> _amenities; // Lưu các tiện ích được chọn
-  final ImagePicker _picker = ImagePicker();
-  bool _isUploading = false;
+  late List<String> _imageUrls; // Danh sách này giờ sẽ chứa các link bạn dán vào
+  late List<String> _amenities; 
 
-  // Danh sách tiện ích mẫu
   final Map<String, IconData> _allAmenities = {
     'Wifi': Icons.wifi,
     'Hồ bơi': Icons.pool,
@@ -45,11 +44,12 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
     _nameController = TextEditingController(text: widget.hotel?.name);
     _addressController = TextEditingController(text: widget.hotel?.address);
     _descriptionController = TextEditingController(text: widget.hotel?.description);
+    
+    // Khởi tạo controller mới
+    _imageUrlController = TextEditingController(); 
 
-    // Phải tạo list mới (.toList()) để tránh tham chiếu
     _imageUrls = widget.hotel?.imageUrls.toList() ?? []; 
     _amenities = widget.hotel?.amenities.toList() ?? [];
-    // ----------------------------
   }
 
   @override
@@ -57,40 +57,23 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
     _nameController.dispose();
     _addressController.dispose();
     _descriptionController.dispose();
+    _imageUrlController.dispose(); // Hủy controller mới
     super.dispose();
   }
 
-  // --- HÀM TẢI ẢNH MỚI ---
-  Future<void> _pickImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image == null) return;
-
-    setState(() => _isUploading = true);
-    try {
-      final storageService = context.read<StorageService>();
-      // Đọc bytes và upload (dùng được cả web/mobile)
-      final Uint8List bytes = await image.readAsBytes();
-      final String name = image.name.isNotEmpty
-          ? image.name
-          : 'img_${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-      final downloadUrl = await storageService.uploadImageBytes(
-        bytes,
-        'hotels',
-        fileName: name,
-      );
-
+  // --- HÀM THÊM URL TỪ Ô NHẬP LIỆU ---
+  void _addImageUrl() {
+    final url = _imageUrlController.text.trim();
+    if (url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'))) {
       setState(() {
-        _imageUrls.add(downloadUrl);
+        _imageUrls.add(url);
       });
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi tải ảnh: $e')),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isUploading = false);
+      _imageUrlController.clear(); // Xóa chữ trong ô
+      FocusScope.of(context).unfocus(); // Ẩn bàn phím
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập một URL hợp lệ')),
+      );
     }
   }
 
@@ -98,7 +81,7 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
     if (!_formKey.currentState!.validate()) return;
     if (_imageUrls.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vui lòng tải lên ít nhất 1 ảnh')),
+        const SnackBar(content: Text('Vui lòng thêm ít nhất 1 link ảnh')),
       );
       return;
     }
@@ -115,7 +98,7 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
         name: _nameController.text,
         address: _addressController.text,
         description: _descriptionController.text,
-        imageUrls: _imageUrls,
+        imageUrls: _imageUrls, // Lưu danh sách link
         amenities: _amenities,
       );
 
@@ -153,7 +136,6 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
               decoration: const InputDecoration(labelText: 'Hotel Name'),
               validator: (v) => v?.isEmpty == true ? 'Required' : null,
             ),
-            // ... (các trường Name, Address, Description giữ nguyên) ...
             const SizedBox(height: 16),
             TextFormField(
               controller: _addressController,
@@ -167,7 +149,7 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
               maxLines: 3,
             ),
             
-            // --- UI MỚI CHO TIỆN ÍCH (AMENITIES) ---
+            // --- UI TIỆN ÍCH (AMENITIES) - GIỮ NGUYÊN ---
             const SizedBox(height: 24),
             Text('Tiện ích', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
@@ -198,8 +180,10 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
 
             // --- UI MỚI CHO HÌNH ẢNH (IMAGES) ---
             const SizedBox(height: 24),
-            Text('Hình ảnh', style: Theme.of(context).textTheme.titleMedium),
+            Text('Hình ảnh (Link URL)', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
+
+            // GridView hiển thị ảnh (giữ nguyên, nó vẫn hoạt động)
             if (_imageUrls.isNotEmpty)
               GridView.builder(
                 shrinkWrap: true,
@@ -221,6 +205,13 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
                           fit: BoxFit.cover,
                           width: double.infinity,
                           height: double.infinity,
+                          // Thêm errorBuilder để xử lý link hỏng
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey[200],
+                              child: const Icon(Icons.broken_image, color: Colors.grey),
+                            );
+                          },
                         ),
                       ),
                       IconButton(
@@ -228,7 +219,6 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
                         onPressed: () {
                           setState(() {
                             _imageUrls.removeAt(index);
-                            // TODO: (Nâng cao) Xóa file trên Storage
                           });
                         },
                       ),
@@ -237,12 +227,29 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
                 },
               ),
             const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: _isUploading ? null : _pickImage,
-              icon: _isUploading 
-                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                   : const Icon(Icons.add_a_photo),
-              label: Text(_isUploading ? 'Đang tải lên...' : 'Thêm ảnh'),
+            
+            // Ô nhập link và nút Thêm
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _imageUrlController,
+                    decoration: const InputDecoration(
+                      labelText: 'Dán link ảnh (http://...)',
+                      border: OutlineInputBorder()
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.add_link),
+                  onPressed: _addImageUrl,
+                  style: IconButton.styleFrom(
+                    backgroundColor: Colors.indigo,
+                    foregroundColor: Colors.white
+                  ),
+                ),
+              ],
             ),
             // ---------------------------------------
 
