@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:doanflutter/features/hotel/domain/entities/hotel_entity.dart';
 import 'package:doanflutter/features/hotel/data/models/hotel_model.dart';
 import 'package:doanflutter/features/hotel/domain/repositories/hotel_repository.dart';
@@ -19,6 +20,69 @@ class HotelProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? _error;
   String? get error => _error;
+
+  // --- STATE MỚI CHO LỌC/TÌM KIẾM ---
+  String _searchQuery = '';
+  double _minPrice = 0.0;
+  double _maxPrice = 10000000.0; // Mặc định giá tối đa (10 triệu)
+  List<String> _selectedAmenities = [];
+
+  // Getters cho UI
+  String get searchQuery => _searchQuery;
+  RangeValues get priceRange => RangeValues(_minPrice, _maxPrice);
+  List<String> get selectedAmenities => _selectedAmenities;
+
+  // Setters cho UI
+  void setSearchQuery(String query) {
+    _searchQuery = query;
+    notifyListeners(); // Thông báo để UI (filteredHotels) cập nhật
+  }
+
+  void setPriceRange(RangeValues values) {
+    _minPrice = values.start;
+    _maxPrice = values.end;
+    notifyListeners();
+  }
+
+  void toggleAmenity(String amenity) {
+    if (_selectedAmenities.contains(amenity)) {
+      _selectedAmenities.remove(amenity);
+    } else {
+      _selectedAmenities.add(amenity);
+    }
+    notifyListeners();
+  }
+
+  // --- GETTER MỚI CHO DANH SÁCH ĐÃ LỌC ---
+  List<HotelEntity> get filteredHotels {
+    List<HotelEntity> filtered = List.from(_allHotels);
+
+    // 1. Lọc theo tên
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered
+          .where((h) =>
+              h.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+              h.address.toLowerCase().contains(_searchQuery.toLowerCase()))
+          .toList();
+    }
+
+    // 2. Lọc theo giá (minPrice của khách sạn phải nằm trong khoảng)
+    filtered = filtered
+        .where((h) =>
+            (h.minPrice >= _minPrice) &&
+            (h.minPrice <= _maxPrice || _maxPrice >= 10000000.0))
+        .toList();
+
+    // 3. Lọc theo tiện ích (Khách sạn phải có TẤT CẢ tiện ích đã chọn)
+    if (_selectedAmenities.isNotEmpty) {
+      filtered = filtered
+          .where((h) =>
+              _selectedAmenities.every((amenity) => h.amenities.contains(amenity)))
+          .toList();
+    }
+    
+    return filtered;
+  }
 
   // Action: Tải TẤT CẢ khách sạn (cho Khách hàng)
   Future<void> fetchAllHotels() async {

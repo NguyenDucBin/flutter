@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:doanflutter/features/rooms/presentation/provider/room_provider.dart';
+// --- THÊM IMPORT CHO RoomEntity VÀ NumberFormat ---
+import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
+import 'package:intl/intl.dart';
+// -------------------------------------------
+
 
 class RoomsListPage extends StatefulWidget {
   final String hotelId;
@@ -16,7 +21,9 @@ class _RoomsListPageState extends State<RoomsListPage> {
     super.initState();
     // Ngay khi trang được mở, gọi Provider để tải dữ liệu
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RoomProvider>().fetchRooms(widget.hotelId);
+      // --- SỬA TÊN HÀM Ở ĐÂY ---
+      context.read<RoomProvider>().fetchAllRooms(widget.hotelId);
+      // ------------------------
     });
   }
 
@@ -24,7 +31,9 @@ class _RoomsListPageState extends State<RoomsListPage> {
   Widget build(BuildContext context) {
     // Lắng nghe thay đổi từ RoomProvider
     final roomProvider = context.watch<RoomProvider>();
-    final filteredRooms = roomProvider.filteredRooms;
+    // --- SỬA GETTER Ở ĐÂY ---
+    final filteredRooms = roomProvider.allFilteredRoomsForAdmin;
+    // ----------------------
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
@@ -35,9 +44,11 @@ class _RoomsListPageState extends State<RoomsListPage> {
         ),
         centerTitle: true,
         backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white, // Thêm màu chữ cho AppBar
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white, // Thêm màu chữ cho FAB
         icon: const Icon(Icons.add),
         label: const Text('Add Room'),
         onPressed: () {
@@ -62,7 +73,7 @@ class _RoomsListPageState extends State<RoomsListPage> {
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12), // Điều chỉnh padding
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -115,7 +126,9 @@ class _RoomsListPageState extends State<RoomsListPage> {
                                 ),
                               ),
                               subtitle: Text(
-                                'Price: ${room.pricePerNight.toStringAsFixed(0)} VNĐ',
+                                // --- SỬA ĐỊNH DẠNG GIÁ ---
+                                'Price: ${NumberFormat.simpleCurrency(locale: 'vi_VN', decimalDigits: 0).format(room.pricePerNight)}', // Định dạng tiền tệ
+                                // --- KẾT THÚC SỬA ---
                                 style: const TextStyle(color: Colors.grey),
                               ),
                               trailing: PopupMenuButton<String>(

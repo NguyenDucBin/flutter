@@ -10,6 +10,9 @@ class HotelModel extends HotelEntity {
     super.description,
     super.imageUrls,
     super.amenities,
+    super.minPrice,
+    super.avgRating,
+    super.reviewCount,
   });
 
   factory HotelModel.empty() {
@@ -21,6 +24,9 @@ class HotelModel extends HotelEntity {
       description: '',
       imageUrls: [],
       amenities: [],
+      minPrice: 0.0,
+      avgRating: 0.0,
+      reviewCount: 0,
     );
   }
 
@@ -35,6 +41,9 @@ class HotelModel extends HotelEntity {
       description: data['description'] ?? '',
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
       amenities: List<String>.from(data['amenities'] ?? []),
+      minPrice: (data['minPrice'] ?? 0.0).toDouble(),
+      avgRating: (data['avgRating'] ?? 0.0).toDouble(),
+      reviewCount: (data['reviewCount'] ?? 0).toInt(),
     );
   }
 
@@ -49,6 +58,9 @@ class HotelModel extends HotelEntity {
       'imageUrls': imageUrls,
       'amenities': amenities,
       'updatedAt': FieldValue.serverTimestamp(),
+      'minPrice': minPrice,
+      'avgRating': avgRating,
+      'reviewCount': reviewCount,
     };
   }
 }

@@ -38,7 +38,11 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Tải phòng và review cho khách sạn này
       // Tạm thời vẫn gọi fetchRooms, Giai đoạn 3 sẽ đổi sang fetchAvailableRooms
-      context.read<RoomProvider>().fetchRooms(widget.hotel.id);
+      context.read<RoomProvider>().fetchAvailableRooms(
+            widget.hotel.id,
+            _checkIn,
+            _checkOut,
+          );
       context.read<ReviewProvider>().fetchReviews(widget.hotel.id);
     });
   }
@@ -79,12 +83,14 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
           _checkOut = picked;
         }
       });
-      // TODO Giai đoạn 3: Gọi lại hàm fetchAvailableRooms(widget.hotel.id, _checkIn, _checkOut) tại đây
-      // Ví dụ: context.read<RoomProvider>().fetchAvailableRooms(widget.hotel.id, _checkIn, _checkOut);
+      context.read<RoomProvider>().fetchAvailableRooms(
+            widget.hotel.id,
+            _checkIn,
+            _checkOut,
+          );
       print('Ngày đã chọn: Check-in: $_checkIn, Check-out: $_checkOut'); // Debug
     }
   }
-  // ------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -302,7 +308,12 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
     if (provider.filteredRooms.isEmpty) {
        return const Padding( // Padding cho thông báo trống
         padding: EdgeInsets.symmetric(vertical: 32.0),
-        child: Center(child: Text('Không có phòng nào trong khách sạn này.', style: TextStyle(color: Colors.grey))),
+        child: Center(
+          child: Text(
+            'Không có phòng trống cho ngày đã chọn.',
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
       );
     }
 
@@ -316,7 +327,7 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
 
         return RoomCardWidget(
           room: room,
-          isAvailable: isActuallyAvailable,
+          isAvailable: true,
           onBookNowPressed: () {
             // --- CẬP NHẬT ĐIỀU HƯỚNG ---
             Navigator.pushNamed(

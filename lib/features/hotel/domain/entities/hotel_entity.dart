@@ -8,6 +8,9 @@ class HotelEntity extends Equatable {
   final String description;
   final List<String> imageUrls; // Danh sách link ảnh
   final List<String> amenities; // Danh sách tiện ích (wifi, pool...)
+  final double minPrice;      // Giá phòng thấp nhất
+  final double avgRating;     // Điểm đánh giá trung bình
+  final int reviewCount;    // Số lượng đánh giá
 
   const HotelEntity({
     required this.id,
@@ -17,6 +20,9 @@ class HotelEntity extends Equatable {
     this.description = '',
     this.imageUrls = const [],
     this.amenities = const [],
+    this.minPrice = 0.0,
+    this.avgRating = 0.0,
+    this.reviewCount = 0,
   });
 
   factory HotelEntity.empty() {
@@ -25,6 +31,9 @@ class HotelEntity extends Equatable {
       ownerId: '',
       name: '',
       address: '',
+      minPrice: 0.0,
+      avgRating: 0.0,
+      reviewCount: 0,
     );
   }
 
@@ -38,6 +47,9 @@ class HotelEntity extends Equatable {
       description,
       imageUrls,
       amenities,
+      minPrice,
+      avgRating,
+      reviewCount,
     ];
   }
 }
