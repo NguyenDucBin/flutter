@@ -10,12 +10,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations: 
+    sdk: flutter
 
   # === Gói lõi ===
   cupertino_icons: ^1.0.8
   equatable: ^2.0.7 # Giữ lại, rất tốt cho Entity & State
   provider: ^6.1.2 # 👈 ĐÃ THÊM (Lõi state management)
-  intl: ^0.19.0 # 👈 ĐÃ THÊM (Cho ngày và tiền tệ)
+  intl: ^0.20.2 # 👈 ĐÃ THÊM (Cho ngày và tiền tệ)
 
   # === Gói Firebase ===
   # (Xóa số phiên bản cũ để lấy bản mới nhất)

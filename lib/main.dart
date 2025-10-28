@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 // --- Core ---
 import 'firebase_options.dart';
@@ -171,6 +172,17 @@ class AppEntry extends StatelessWidget {
         onGenerateRoute: AppRouter.onGenerateRoute,
         // Điểm bắt đầu là '/', AppRouter sẽ điều hướng đến AuthGate
         initialRoute: '/',
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en', ''), // English, no country code
+          Locale('vi', ''), // Vietnamese, no country code
+          // Thêm các ngôn ngữ khác nếu cần
+        ],
+        locale: const Locale('vi', ''),
       ),
     );
   }

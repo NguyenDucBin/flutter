@@ -1,3 +1,4 @@
+// lib/features/rooms/domain/entities/room_entity.dart
 import 'package:equatable/equatable.dart';
 
 class RoomEntity extends Equatable {
@@ -6,7 +7,9 @@ class RoomEntity extends Equatable {
   final String type;
   final double pricePerNight;
   final int capacity;
-  final bool available; // <-- Đã thêm trường này
+  final bool available;
+  final List<String> imageUrls; // <-- THÊM DÒNG NÀY
+  final List<String> amenities; // <-- THÊM DÒNG NÀY
 
   const RoomEntity({
     required this.roomId,
@@ -14,7 +17,9 @@ class RoomEntity extends Equatable {
     required this.type,
     required this.pricePerNight,
     required this.capacity,
-    required this.available, // <-- Đã thêm
+    required this.available,
+    this.imageUrls = const [], // <-- THÊM GIÁ TRỊ MẶC ĐỊNH
+    this.amenities = const [], // <-- THÊM GIÁ TRỊ MẶC ĐỊNH
   });
 
   // Add empty factory constructor
@@ -26,9 +31,20 @@ class RoomEntity extends Equatable {
       pricePerNight: 0,
       capacity: 0,
       available: false,
+      imageUrls: [],
+      amenities: [],
     );
   }
 
   @override
-  List<Object?> get props => [roomId, hotelId, type, pricePerNight, capacity, available];
+  List<Object?> get props => [
+        roomId,
+        hotelId,
+        type,
+        pricePerNight,
+        capacity,
+        available,
+        imageUrls, // <-- THÊM VÀO
+        amenities, // <-- THÊM VÀO
+      ];
 }

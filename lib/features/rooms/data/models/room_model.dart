@@ -1,3 +1,4 @@
+// lib/features/rooms/data/models/room_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
 
@@ -9,7 +10,22 @@ class RoomModel extends RoomEntity {
     required super.pricePerNight,
     required super.capacity,
     required super.available,
+    required super.imageUrls, // <-- YÊU CẦU
+    required super.amenities, // <-- YÊU CẦU
   });
+
+  factory RoomModel.empty() {
+    return const RoomModel(
+      roomId: '',
+      hotelId: '',
+      type: '',
+      pricePerNight: 0,
+      capacity: 0,
+      available: false,
+      imageUrls: [],
+      amenities: [],
+    );
+  }
 
   // Chuyển đổi từ Firestore Document về Model
   factory RoomModel.fromSnapshot(DocumentSnapshot snap) {
@@ -21,6 +37,9 @@ class RoomModel extends RoomEntity {
       pricePerNight: (data['pricePerNight'] ?? 0).toDouble(),
       capacity: data['capacity'] ?? 0,
       available: data['available'] ?? false,
+      // Đọc 2 trường mới (giống HotelModel)
+      imageUrls: List<String>.from(data['imageUrls'] ?? []),
+      amenities: List<String>.from(data['amenities'] ?? []),
     );
   }
 
@@ -32,6 +51,8 @@ class RoomModel extends RoomEntity {
       'pricePerNight': pricePerNight,
       'capacity': capacity,
       'available': available,
+      'imageUrls': imageUrls, // <-- THÊM DÒNG NÀY
+      'amenities': amenities, // <-- THÊM DÒNG NÀY
     };
   }
 }

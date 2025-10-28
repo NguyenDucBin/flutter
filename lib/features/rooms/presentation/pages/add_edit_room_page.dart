@@ -26,6 +26,21 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
   late bool _isAvailable;
   bool _isLoading = false;
 
+  // --- THÊM CÁC BIẾN MỚI ---
+  late final TextEditingController _imageUrlController; // Cho link ảnh
+  late List<String> _imageUrls; // Danh sách link ảnh
+  late List<String> _amenities; // Danh sách tiện ích
+
+  // Danh sách tiện ích mẫu cho PHÒNG
+  final Map<String, IconData> _allRoomAmenities = {
+    'TV': Icons.tv,
+    'Ban công': Icons.balcony,
+    'Bồn tắm': Icons.bathtub_outlined,
+    'View biển': Icons.beach_access,
+    'Điều hòa': Icons.ac_unit,
+  };
+  // -------------------------
+
   bool get _isEditing => widget.room != null;
 
   @override
@@ -37,6 +52,12 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
     _capacityController =
         TextEditingController(text: widget.room?.capacity.toString() ?? '2');
     _isAvailable = widget.room?.available ?? true;
+
+    // --- KHỞI TẠO CÁC BIẾN MỚI ---
+    _imageUrlController = TextEditingController();
+    _imageUrls = widget.room?.imageUrls.toList() ?? [];
+    _amenities = widget.room?.amenities.toList() ?? [];
+    // ----------------------------
   }
 
   @override
@@ -44,52 +65,48 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
     _typeController.dispose();
     _priceController.dispose();
     _capacityController.dispose();
+    _imageUrlController.dispose(); // Hủy controller mới
     super.dispose();
+  }
+
+  // --- HÀM THÊM LINK ẢNH (SAO CHÉP TỪ ADDEDITHOTELPAGE) ---
+  void _addImageUrl() {
+    final url = _imageUrlController.text.trim();
+    if (url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'))) {
+      setState(() {
+        _imageUrls.add(url);
+      });
+      _imageUrlController.clear();
+      FocusScope.of(context).unfocus();
+    } else {
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng nhập một URL hợp lệ (bắt đầu bằng http:// hoặc https://)')),
+      );
+    }
   }
 
   Future<void> _saveRoom() async {
     if (!_formKey.currentState!.validate()) return; // Kiểm tra form
+    // Kiểm tra ảnh
+    if (_imageUrls.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng thêm ít nhất 1 link ảnh cho phòng')),
+      );
+      return;
+    }
 
     setState(() => _isLoading = true);
 
     try {
       final roomData = RoomEntity(
-        // Nếu là Cập nhật, giữ nguyên roomId.
-        // Nếu là Thêm mới, để trống roomId, Firestore sẽ tự tạo ID.
-        // Tuy nhiên, RoomModel của bạn yêu cầu roomId, nên ta sẽ xử lý
-        // trong Repository (hiện tại logic của bạn đang tự add, ta cần sửa nhẹ)
-        // Tạm thời, chúng ta vẫn cần 1 ID, hãy để Repository xử lý.
-        // NHƯNG Entity của bạn yêu cầu roomId.
-        // Hãy sửa lại Entity: roomId có thể là String?
-        // ---
-        // GIẢI PHÁP TỐT NHẤT: Vẫn giữ nguyên Entity.
-        // Khi tạo mới, ta sẽ gán một ID tạm ở đây,
-        // nhưng hàm createRoom của bạn trong Impl
-        // đang dùng .add() (tự tạo ID) thay vì .doc(id).set().
-        // Hãy sửa `RoomRepositoryImpl`:
-        // Sửa: await _db.collection('hotels').doc(room.hotelId).collection('rooms').add(model.toMap());
-        // Thành:
-        // DocumentReference docRef;
-        // if (room.roomId.isEmpty) {
-        //   docRef = _db.collection('hotels').doc(room.hotelId).collection('rooms').doc();
-        // } else {
-        //   docRef = _db.collection('hotels').doc(room.hotelId).collection('rooms').doc(room.roomId);
-        // }
-        // await docRef.set(model.toMap());
-        //
-        // --> Sau khi xem lại code, hàm `createRoom` của bạn
-        // dùng `.add()` tức là nó phớt lờ `roomId` từ entity.
-        // Và hàm `updateRoom`
-        // lại dùng `doc(room.roomId).update()`.
-        // -> Logic này HOÀN TOÀN CHÍNH XÁC cho kiến trúc của bạn.
-        // Chúng ta chỉ cần truyền đúng entity.
-
-        roomId: widget.room?.roomId ?? '', // Cập nhật: dùng ID cũ. Thêm mới: rỗng.
+        roomId: widget.room?.roomId ?? '', // ID cũ nếu sửa, rỗng nếu tạo mới
         hotelId: widget.hotelId,
         type: _typeController.text.trim(),
         pricePerNight: double.tryParse(_priceController.text) ?? 0.0,
         capacity: int.tryParse(_capacityController.text) ?? 2,
         available: _isAvailable,
+        imageUrls: _imageUrls, // <-- LƯU TRƯỜNG MỚI
+        amenities: _amenities, // <-- LƯU TRƯỜNG MỚI
       );
 
       final provider = context.read<RoomProvider>();
@@ -116,7 +133,8 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Cập nhật Phòng' : 'Thêm Phòng Mới'),
-        backgroundColor: Colors.indigo,
+        backgroundColor: Colors.indigo, // Màu nhất quán
+        foregroundColor: Colors.white, // Màu chữ trên AppBar
       ),
       body: Form(
         key: _formKey,
@@ -125,28 +143,39 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
           children: [
             TextFormField(
               controller: _typeController,
-              decoration: const InputDecoration(labelText: 'Loại phòng (VD: Phòng Đôi, Suite)'),
+              decoration: const InputDecoration(
+                labelText: 'Loại phòng',
+                hintText: 'VD: Phòng Đôi, Suite...',
+                border: OutlineInputBorder(), // Thêm viền
+              ),
               validator: (v) => v?.isEmpty == true ? 'Vui lòng nhập loại phòng' : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _priceController,
-              decoration: const InputDecoration(labelText: 'Giá mỗi đêm (VNĐ)'),
+              decoration: const InputDecoration(
+                labelText: 'Giá mỗi đêm',
+                suffixText: 'VNĐ',
+                border: OutlineInputBorder(),
+              ),
               keyboardType: TextInputType.number,
               validator: (v) {
                 if (v == null || v.isEmpty) return 'Vui lòng nhập giá';
-                if (double.tryParse(v) == null) return 'Giá không hợp lệ';
+                if (double.tryParse(v) == null || double.parse(v) <= 0) return 'Giá không hợp lệ';
                 return null;
               },
             ),
             const SizedBox(height: 16),
             TextFormField(
               controller: _capacityController,
-              decoration: const InputDecoration(labelText: 'Số người tối đa'),
+              decoration: const InputDecoration(
+                labelText: 'Số người tối đa',
+                border: OutlineInputBorder(),
+              ),
               keyboardType: TextInputType.number,
               validator: (v) {
                 if (v == null || v.isEmpty) return 'Vui lòng nhập số người';
-                if (int.tryParse(v) == null) return 'Số người không hợp lệ';
+                if (int.tryParse(v) == null || int.parse(v) <= 0) return 'Số người không hợp lệ';
                 return null;
               },
             ),
@@ -158,14 +187,133 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
                 setState(() => _isAvailable = val);
               },
               activeColor: Colors.indigo,
+              contentPadding: EdgeInsets.zero, // Bỏ padding mặc định
             ),
-            const SizedBox(height: 24),
+
+            // --- THÊM UI TIỆN ÍCH PHÒNG ---
+            const Divider(height: 32, thickness: 1), // Dày hơn
+            Text('Tiện ích phòng', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 4.0,
+              children: _allRoomAmenities.entries.map((entry) {
+                final isSelected = _amenities.contains(entry.key);
+                return FilterChip(
+                  label: Text(entry.key),
+                  avatar: Icon(entry.value, size: 18),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    setState(() {
+                      if (selected) {
+                        _amenities.add(entry.key);
+                      } else {
+                        _amenities.remove(entry.key);
+                      }
+                    });
+                  },
+                   selectedColor: Colors.indigo.withOpacity(0.15), // Màu đậm hơn
+                  checkmarkColor: Colors.indigo,
+                  shape: RoundedRectangleBorder( // Bo tròn hơn
+                      borderRadius: BorderRadius.circular(20)),
+                );
+              }).toList(),
+            ),
+            // -----------------------------
+
+            // --- THÊM UI ẢNH PHÒNG ---
+            const Divider(height: 32, thickness: 1),
+            Text('Hình ảnh phòng (Link URL)', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            // GridView hiển thị ảnh
+            if (_imageUrls.isNotEmpty)
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 8,
+                  mainAxisSpacing: 8,
+                ),
+                itemCount: _imageUrls.length,
+                itemBuilder: (context, index) {
+                  return Stack(
+                    alignment: Alignment.topRight,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          _imageUrls[index],
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          height: double.infinity,
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                color: Colors.grey[200],
+                                child: const Icon(Icons.broken_image, color: Colors.grey),
+                              ),
+                        ),
+                      ),
+                       // Nút xóa ảnh
+                      Material( // Thêm Material để có hiệu ứng ripple
+                        color: Colors.black45, // Nền đen mờ
+                        shape: const CircleBorder(),
+                        clipBehavior: Clip.antiAlias,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          iconSize: 20,
+                          icon: const Icon(Icons.close, color: Colors.white),
+                          onPressed: () => setState(() => _imageUrls.removeAt(index)),
+                          tooltip: 'Xóa ảnh',
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            const SizedBox(height: 8),
+            // Ô nhập link và nút Thêm
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _imageUrlController,
+                    decoration: const InputDecoration(
+                      labelText: 'Dán link ảnh (http://...)',
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10), // Padding nhỏ hơn
+                    ),
+                    keyboardType: TextInputType.url,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                IconButton.filled( // Dùng filled cho nổi bật
+                  icon: const Icon(Icons.add_link),
+                  onPressed: _addImageUrl,
+                  style: IconButton.styleFrom(backgroundColor: Colors.indigo),
+                  tooltip: 'Thêm Link Ảnh',
+                ),
+              ],
+            ),
+            // ---------------------------
+
+            const SizedBox(height: 32), // Tăng khoảng cách
             ElevatedButton(
               onPressed: _isLoading ? null : _saveRoom,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white, // Màu chữ
+                minimumSize: const Size(double.infinity, 50), // Nút to hơn
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Bo tròn
+              ),
               child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : Text(_isEditing ? 'Cập nhật' : 'Thêm mới'),
+                  ? const SizedBox( // Spinner nhỏ hơn
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                    )
+                  : Text(_isEditing ? 'Cập nhật Phòng' : 'Thêm Phòng Mới', style: const TextStyle(fontSize: 16)),
             ),
           ],
         ),

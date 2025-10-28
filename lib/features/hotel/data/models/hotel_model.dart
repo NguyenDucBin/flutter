@@ -12,6 +12,18 @@ class HotelModel extends HotelEntity {
     super.amenities,
   });
 
+  factory HotelModel.empty() {
+    return const HotelModel(
+      id: '',
+      ownerId: '',
+      name: '',
+      address: '',
+      description: '',
+      imageUrls: [],
+      amenities: [],
+    );
+  }
+
   // Chuyển đổi từ Firestore Document về Model
   factory HotelModel.fromSnapshot(DocumentSnapshot snap) {
     var data = snap.data() as Map<String, dynamic>;

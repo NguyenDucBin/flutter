@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
 import 'package:doanflutter/features/rooms/domain/repositories/room_repository.dart';
+import 'package:doanflutter/features/rooms/data/models/room_model.dart'; // <-- THÊM DÒNG NÀY
 
 class RoomProvider extends ChangeNotifier {
   final RoomRepository _roomRepository;
@@ -32,7 +33,7 @@ class RoomProvider extends ChangeNotifier {
   String? getRoomType(String roomId) {
     final room = _rooms.firstWhere(
       (r) => r.roomId == roomId,
-      orElse: () => RoomEntity.empty(),
+      orElse: () => RoomModel.empty(),
     );
     return room.type;
   }

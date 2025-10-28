@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:doanflutter/features/hotel/domain/entities/hotel_entity.dart';
+import 'package:doanflutter/features/hotel/data/models/hotel_model.dart';
 import 'package:doanflutter/features/hotel/domain/repositories/hotel_repository.dart';
 
 class HotelProvider extends ChangeNotifier {
@@ -99,7 +100,7 @@ class HotelProvider extends ChangeNotifier {
   String? getHotelName(String hotelId) {
     final hotel = _allHotels.firstWhere(
       (h) => h.id == hotelId,
-      orElse: () => HotelEntity.empty(),
+      orElse: () => HotelModel.empty(),
     );
     return hotel.name;
   }
@@ -108,7 +109,7 @@ class HotelProvider extends ChangeNotifier {
   String? getHotelOwnerId(String hotelId) {
     final hotel = _allHotels.firstWhere(
       (h) => h.id == hotelId,
-      orElse: () => HotelEntity.empty(),
+      orElse: () => HotelModel.empty(),
     );
     return hotel.ownerId;
   }
