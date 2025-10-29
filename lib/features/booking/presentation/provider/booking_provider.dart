@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:doanflutter/features/booking/domain/entities/booking_entity.dart';
-import 'package:doanflutter/features/booking/data/models/booking_model.dart';
+import 'package:doanflutter/features/booking/data/models/booking_model.dart'; // Đảm bảo bạn đã import BookingModel
 import 'package:doanflutter/features/booking/domain/repositories/booking_repository.dart';
 
 class BookingProvider extends ChangeNotifier {
@@ -13,18 +13,19 @@ class BookingProvider extends ChangeNotifier {
   List<BookingEntity> get myBookings => _myBookings;
   List<BookingEntity> get upcomingBookings {
     final now = DateTime.now();
+    // Lấy các booking chưa bắt đầu VÀ có status là pending hoặc confirmed
     return _myBookings.where((b) {
       return (b.status == 'pending' || b.status == 'confirmed') &&
-             b.checkIn.isAfter(now);
+             b.checkIn.isAfter(now); // Chỉ lấy những booking trong tương lai
     }).toList();
   }
 
   List<BookingEntity> get completedBookings {
     final now = DateTime.now();
+    // Lấy các booking đã check-out HOẶC ngày check-out đã qua VÀ status là confirmed/checked_in
     return _myBookings.where((b) {
-      // Đã check-out HOẶC ngày check-out đã qua
       return b.status == 'checked_out' ||
-             (b.status == 'confirmed' && b.checkOut.isBefore(now));
+             ((b.status == 'confirmed' || b.status == 'checked_in') && b.checkOut.isBefore(now));
     }).toList();
   }
 
@@ -74,10 +75,49 @@ class BookingProvider extends ChangeNotifier {
     }
   }
 
+  // --- THÊM PHƯƠNG THỨC HỦY PHÒNG ---
+  Future<void> cancelBookingByUser(String bookingId, String userId) async {
+    _error = null;
+    try {
+      // Gọi repository để cập nhật status thành 'canceled'
+      await _bookingRepository.updateBookingStatus(bookingId, 'canceled');
+
+      // Cập nhật trạng thái trong UI ngay lập tức
+      // Tìm booking trong danh sách _myBookings và cập nhật status
+      final index = _myBookings.indexWhere((b) => b.bookingId == bookingId);
+      if (index != -1) {
+        // Tạo một bản sao của booking cũ với status mới
+        final oldBooking = _myBookings[index];
+        _myBookings[index] = BookingModel( // Giả sử bạn có BookingModel
+          bookingId: oldBooking.bookingId,
+          userId: oldBooking.userId,
+          ownerId: oldBooking.ownerId,
+          hotelId: oldBooking.hotelId,
+          hotelName: oldBooking.hotelName,
+          roomId: oldBooking.roomId,
+          roomType: oldBooking.roomType,
+          checkIn: oldBooking.checkIn,
+          checkOut: oldBooking.checkOut,
+          totalPrice: oldBooking.totalPrice,
+          status: 'canceled', // Cập nhật status
+        );
+         notifyListeners(); // Thông báo thay đổi UI
+      }
+      // Không cần fetch lại toàn bộ danh sách nếu chỉ cập nhật 1 item
+
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      // Ném lỗi ra để UI có thể hiển thị thông báo
+      throw Exception('Hủy phòng thất bại: ${e.toString()}');
+    }
+  }
+  // ------------------------------------
+
   // Trạng thái cho danh sách booking của người quản lý
   List<BookingEntity> _adminBookings = [];
   List<BookingEntity> get adminBookings => _adminBookings;
-  
+
   bool _isLoadingAdminList = false;
   bool get isLoadingAdminList => _isLoadingAdminList;
 
@@ -86,21 +126,22 @@ class BookingProvider extends ChangeNotifier {
     _isLoadingAdminList = true;
     _error = null;
     notifyListeners();
-    
+
     try {
       _adminBookings = await _bookingRepository.fetchBookingsForOwner(ownerId);
     } catch (e) {
       _error = e.toString();
     }
-    
+
     _isLoadingAdminList = false;
     notifyListeners();
   }
 
-  // Cập nhật trạng thái booking
+  // Cập nhật trạng thái booking (Dùng chung cho cả admin và user hủy)
   Future<void> updateBookingStatus(String bookingId, String status) async {
     try {
       await _bookingRepository.updateBookingStatus(bookingId, status);
+      // Cập nhật cả 2 danh sách trong provider
       _updateStatusInList(_myBookings, bookingId, status);
       _updateStatusInList(_adminBookings, bookingId, status);
       notifyListeners();
@@ -111,10 +152,12 @@ class BookingProvider extends ChangeNotifier {
     }
   }
 
+  // Hàm helper để cập nhật status trong một list cụ thể
   void _updateStatusInList(List<BookingEntity> list, String bookingId, String status) {
     final index = list.indexWhere((b) => b.bookingId == bookingId);
     if (index != -1) {
       final oldBooking = list[index];
+      // Tạo object mới với status đã cập nhật
       list[index] = BookingModel(
         bookingId: oldBooking.bookingId,
         userId: oldBooking.userId,
@@ -126,7 +169,7 @@ class BookingProvider extends ChangeNotifier {
         checkIn: oldBooking.checkIn,
         checkOut: oldBooking.checkOut,
         totalPrice: oldBooking.totalPrice,
-        status: status
+        status: status, // Status mới
       );
     }
   }

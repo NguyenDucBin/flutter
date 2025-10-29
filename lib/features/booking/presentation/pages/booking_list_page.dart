@@ -43,10 +43,11 @@ class _BookingListPageState extends State<BookingListPage>
     super.dispose();
   }
 
-  // Sửa lại hàm build để dùng DefaultTabController
+  // Sửa lại hàm build để dùng AppBar có TabBar
   @override
   Widget build(BuildContext context) {
-    final bookingProvider = context.watch<BookingProvider>();
+    // Không cần watch ở đây vì _buildBody đã watch rồi
+    // final bookingProvider = context.watch<BookingProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -78,10 +79,8 @@ class _BookingListPageState extends State<BookingListPage>
         ),
       ),
       backgroundColor: const Color(0xFFF4F6F9),
-      // Bỏ FloatingActionButton ở đây (nó đã có ở UserHomePage)
-
-      // Sửa body để hiển thị TabBarView
-      body: _buildBody(context, bookingProvider),
+      // Sửa body để gọi hàm _buildBody
+      body: _buildBody(context, context.watch<BookingProvider>()), // Gọi hàm _buildBody và truyền provider đã watch
     );
   }
 
@@ -104,15 +103,16 @@ class _BookingListPageState extends State<BookingListPage>
     return TabBarView(
       controller: _tabController,
       children: [
-        // Tab "Sắp tới" - dùng getter upcomingBookings
+        // Tab "Sắp tới" - Thêm showCancelButton: true
         _buildBookingTab(
           context,
           provider.upcomingBookings,
           user,
           'Chưa có chuyến đi nào sắp tới.',
+          showCancelButton: true, // <<< THÊM DÒNG NÀY
         ),
         // Tab "Đã qua" - dùng getter completedBookings VÀ HÀM MỚI
-        _buildCompletedBookingTab(
+        _buildCompletedBookingTab( // Giữ nguyên hàm này
           context,
           provider.completedBookings,
           user,
@@ -120,19 +120,21 @@ class _BookingListPageState extends State<BookingListPage>
         ),
 
         // Tab "Đã hủy" - dùng getter cancelledBookings
-        _buildBookingTab(
+        _buildBookingTab( // Giữ nguyên hàm này
           context,
           provider.cancelledBookings,
           user,
           'Không có chuyến đi nào bị hủy.',
+          // Không cần nút hủy ở đây
         ),
       ],
     );
   }
 
   // Tách ra hàm mới: _buildBookingTab để tái sử dụng code cho mỗi tab
+  // --- THÊM THAM SỐ showCancelButton ---
   Widget _buildBookingTab(BuildContext context, List<BookingEntity> bookings,
-      dynamic user, String emptyMessage) {
+      dynamic user, String emptyMessage, { bool showCancelButton = false }) { // Thêm tham số
     if (bookings.isEmpty) {
       // Dùng hàm empty state với message tùy chỉnh
       return _buildEmptyState(emptyMessage);
@@ -160,11 +162,29 @@ class _BookingListPageState extends State<BookingListPage>
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                         content: Text('Xem chi tiết cho: ${booking.hotelName}')));
                   },
-                  child: BookingCard(booking: booking)),
-              // Nút review chỉ hiển thị ở tab "Đã qua" VÀ khi status là 'checked_out'
-              // (Hàm này giờ chỉ dùng cho tab "Sắp tới" và "Đã hủy", nên if này sẽ không bao giờ true)
-              if (booking.status == 'checked_out')
-                _buildReviewButton(context, booking, user),
+                  child: BookingCard(booking: booking)
+              ),
+              // --- THÊM PHẦN NÚT HỦY ---
+              if (showCancelButton && (booking.status == 'pending' || booking.status == 'confirmed')) // Chỉ hiện nút Hủy ở tab "Sắp tới" và cho các trạng thái phù hợp
+                Container(
+                  width: double.infinity, // Cho nút chiếm hết chiều rộng
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                     borderRadius: const BorderRadius.only(
+                       bottomLeft: Radius.circular(12),
+                       bottomRight: Radius.circular(12),
+                     )
+                  ),
+                  child: TextButton.icon(
+                    icon: Icon(Icons.cancel_outlined, color: Colors.red[700]),
+                    label: Text(
+                      'Hủy phòng',
+                       style: TextStyle(color: Colors.red[700], fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () => _confirmCancellation(context, booking, user), // Gọi hàm xác nhận hủy
+                  ),
+                ),
+              // -----------------------
             ],
           );
         },
@@ -172,6 +192,56 @@ class _BookingListPageState extends State<BookingListPage>
       ),
     );
   }
+
+  // --- THÊM HÀM XÁC NHẬN HỦY ---
+  Future<void> _confirmCancellation(BuildContext context, BookingEntity booking, dynamic user) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Xác nhận hủy'),
+          content: Text('Bạn có chắc chắn muốn hủy đặt phòng tại "${booking.hotelName}"?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Không'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false); // Trả về false
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Hủy phòng'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true); // Trả về true
+              },
+            ),
+          ],
+        );
+      },
+    );
+
+    // Nếu người dùng xác nhận (confirmed == true)
+    if (confirmed == true && booking.bookingId != null) {
+      try {
+        // Gọi provider để hủy
+        await context.read<BookingProvider>().cancelBookingByUser(booking.bookingId!, user.uid);
+        // Kiểm tra mounted trước khi dùng context trong async gap
+        if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Đã hủy đặt phòng thành công.'), backgroundColor: Colors.orange),
+           );
+        }
+      } catch (e) {
+         // Kiểm tra mounted trước khi dùng context trong async gap
+         if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+            );
+         }
+      }
+    }
+  }
+  // ---------------------------
 
   // Hàm này dành riêng cho tab "Đã qua"
   Widget _buildCompletedBookingTab(BuildContext context,
@@ -200,7 +270,7 @@ class _BookingListPageState extends State<BookingListPage>
                             Text('Xem chi tiết cho: ${booking.hotelName}')));
                   },
                   child: BookingCard(booking: booking)),
-                  
+
               // SỬA ĐỔI: Luôn hiển thị nút review vì đây là tab "Đã qua"
               _buildReviewButton(context, booking, user),
             ],
@@ -265,12 +335,15 @@ class _BookingListPageState extends State<BookingListPage>
   void _showReviewDialog(BuildContext context, dynamic booking, dynamic user) {
     double _rating = 3.0;
     final _commentController = TextEditingController();
+    // Đọc ReviewProvider một lần ở đây
     final reviewProvider = context.read<ReviewProvider>();
+    // Đọc HotelProvider một lần ở đây
+    final hotelProvider = context.read<HotelProvider>();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (ctx) {
+      builder: (ctx) { // ctx là context của bottom sheet
         return Padding(
           padding: EdgeInsets.only(
             bottom: MediaQuery.of(ctx).viewInsets.bottom,
@@ -318,14 +391,23 @@ class _BookingListPageState extends State<BookingListPage>
                   );
                   try {
                     await reviewProvider.submitReview(review);
-                    Navigator.pop(ctx);
-                    context.read<HotelProvider>().fetchAllHotels();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Cảm ơn bạn đã đánh giá!')),
-                    );
+                    Navigator.pop(ctx); // Đóng bottom sheet dùng ctx
+                    // Sau khi gửi review, gọi fetchAllHotels để cập nhật rating trung bình
+                    await hotelProvider.fetchAllHotels();
+                    // Kiểm tra mounted trước khi dùng context bên ngoài
+                    if (mounted) {
+                       ScaffoldMessenger.of(context).showSnackBar(
+                         const SnackBar(content: Text('Cảm ơn bạn đã đánh giá!')),
+                       );
+                    }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Lỗi: ${e.toString()}')));
+                     // Kiểm tra mounted trước khi dùng context bên ngoài
+                     if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                           SnackBar(content: Text('Lỗi: ${e.toString()}')));
+                     }
+                     // Có thể không cần pop ở đây nếu muốn giữ dialog mở khi lỗi
+                     // Navigator.pop(ctx);
                   }
                 },
               ),
