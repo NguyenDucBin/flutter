@@ -1,4 +1,3 @@
-// lib/features/rooms/data/models/room_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
 
@@ -10,8 +9,8 @@ class RoomModel extends RoomEntity {
     required super.pricePerNight,
     required super.capacity,
     required super.available,
-    required super.imageUrls, // <-- YÊU CẦU
-    required super.amenities, // <-- YÊU CẦU
+    required super.imageUrls, 
+    required super.amenities, 
   });
 
   factory RoomModel.empty() {
@@ -51,8 +50,8 @@ class RoomModel extends RoomEntity {
       'pricePerNight': pricePerNight,
       'capacity': capacity,
       'available': available,
-      'imageUrls': imageUrls, // <-- THÊM DÒNG NÀY
-      'amenities': amenities, // <-- THÊM DÒNG NÀY
+      'imageUrls': imageUrls, 
+      'amenities': amenities, 
     };
   }
 }

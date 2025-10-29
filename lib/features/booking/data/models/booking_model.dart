@@ -5,11 +5,11 @@ class BookingModel extends BookingEntity {
   const BookingModel({
     super.bookingId,
     required super.userId,
-    required super.ownerId,     // 👈 THÊM VÀO
+    required super.ownerId,     
     required super.hotelId,
-    required super.hotelName,   // 👈 THÊM VÀO
+    required super.hotelName,   
     required super.roomId,
-    required super.roomType,    // 👈 THÊM VÀO
+    required super.roomType,    
     required super.checkIn,
     required super.checkOut,
     required super.totalPrice,
@@ -22,11 +22,11 @@ class BookingModel extends BookingEntity {
     return BookingModel(
       bookingId: snap.id,
       userId: data['userId'] ?? '',
-      ownerId: data['ownerId'] ?? '',       // 👈 THÊM VÀO
+      ownerId: data['ownerId'] ?? '',       
       hotelId: data['hotelId'] ?? '',
-      hotelName: data['hotelName'] ?? '',   // 👈 THÊM VÀO
+      hotelName: data['hotelName'] ?? '',   
       roomId: data['roomId'] ?? '',
-      roomType: data['roomType'] ?? '',     // 👈 THÊM VÀO
+      roomType: data['roomType'] ?? '',    
       checkIn: (data['checkIn'] as Timestamp).toDate(),
       checkOut: (data['checkOut'] as Timestamp).toDate(),
       totalPrice: (data['totalPrice'] ?? 0).toDouble(),
@@ -38,11 +38,11 @@ class BookingModel extends BookingEntity {
   Map<String, dynamic> toMap() {
     return {
       'userId': userId,
-      'ownerId': ownerId,         // 👈 THÊM VÀO
+      'ownerId': ownerId,         
       'hotelId': hotelId,
-      'hotelName': hotelName,     // 👈 THÊM VÀO
+      'hotelName': hotelName,     
       'roomId': roomId,
-      'roomType': roomType,       // 👈 THÊM VÀO
+      'roomType': roomType,      
       'checkIn': Timestamp.fromDate(checkIn),
       'checkOut': Timestamp.fromDate(checkOut),
       'totalPrice': totalPrice,

@@ -1,4 +1,3 @@
-// lib/features/hotel/presentation/pages/hotel_list_page.dart
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
 import 'package:doanflutter/features/hotel/presentation/provider/hotel_provider.dart';
 import 'package:flutter/material.dart';
@@ -98,8 +97,6 @@ class _HotelListPageState extends State<HotelListPage> {
              ),
              trailing: const Icon(Icons.chevron_right, color: Colors.grey),
              onTap: () {
-               // TODO: Điều hướng đến trang chi tiết khách sạn (HotelDetailPage)
-               // Navigator.pushNamed(context, '/hotel_detail', arguments: hotel.id);
                Navigator.pushNamed(
                  context,
                  '/hotel_detail',

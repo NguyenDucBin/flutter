@@ -46,13 +46,6 @@ class _CustomersListPageState extends State<CustomersListPage> {
           ),
         ],
       ),
-      // Vô hiệu hóa FAB này vì logic không hợp lý
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: null, // Vô hiệu hóa
-      //   backgroundColor: Colors.grey, // Màu xám
-      //   icon: const Icon(Icons.add),
-      //   label: const Text('Add Customer'),
-      // ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

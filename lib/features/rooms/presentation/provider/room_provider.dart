@@ -36,7 +36,6 @@ class RoomProvider extends ChangeNotifier {
       }
     }
   }
-  // --- KẾT THÚC SỬA ---
 
   // Helper: Lấy loại phòng từ ID (dạng String)
   // --- ĐÃ SỬA LOGIC VÀ XÓA HÀM TRÙNG ---
@@ -44,7 +43,6 @@ class RoomProvider extends ChangeNotifier {
     final room = getRoomById(roomId); // Sử dụng hàm getRoomById đã sửa
     return room?.type; // Trả về type nếu room không null
   }
-  // --- KẾT THÚC SỬA ---
 
 
   // Lấy danh sách phòng TRỐNG (lọc theo tìm kiếm) - Dùng cho User trên HotelDetailPage

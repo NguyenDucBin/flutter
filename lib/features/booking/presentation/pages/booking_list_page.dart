@@ -1,13 +1,11 @@
-// lib/features/booking/presentation/pages/booking_list_page.dart
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
 import 'package:doanflutter/features/booking/presentation/provider/booking_provider.dart';
 import 'package:doanflutter/features/reviews/domain/entities/review_entity.dart';
 import 'package:doanflutter/features/reviews/presentation/provider/review_provider.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Thêm import này
+import 'package:intl/intl.dart'; 
 import 'package:provider/provider.dart';
-// Import file widget mới (bạn cần tạo file này)
 import '../widgets/booking_card_widget.dart';
 
 class BookingListPage extends StatefulWidget {
@@ -55,15 +53,11 @@ class _BookingListPageState extends State<BookingListPage> {
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
         onPressed: () {
-          // --- SỬA Ở ĐÂY ---
           // Điều hướng đến trang danh sách khách sạn (ví dụ: route '/home')
           Navigator.pushNamed(context, '/home');
-          // ------------------
         },
-        // --- SỬA Ở ĐÂY ---
         icon: const Icon(Icons.search), // Đổi icon thành tìm kiếm
         label: const Text('Tìm & Đặt Phòng'), // Đổi chữ cho rõ nghĩa
-        // ------------------
       ),
       body: _buildBody(context, user, bookingProvider),
     );
@@ -95,13 +89,11 @@ class _BookingListPageState extends State<BookingListPage> {
         itemCount: provider.myBookings.length,
         itemBuilder: (context, index) {
           final booking = provider.myBookings[index];
-          return Column( // 👈 BỌC BookingCard TRONG COLUMN
+          return Column( 
             children: [
               BookingCard(booking: booking),
-              // 👇--- THÊM NÚT ĐÁNH GIÁ NẾU ĐÃ CHECK-OUT ---
               if (booking.status == 'checked_out')
                 _buildReviewButton(context, booking, user),
-              // ----------------------------------------
             ],
           );
         },

@@ -1,4 +1,3 @@
-// lib/features/booking/presentation/pages/booking_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
@@ -6,17 +5,14 @@ import 'package:doanflutter/features/hotel/presentation/provider/hotel_provider.
 import 'package:doanflutter/features/rooms/presentation/provider/room_provider.dart';
 import 'package:doanflutter/features/booking/presentation/provider/booking_provider.dart';
 import 'package:doanflutter/features/booking/domain/entities/booking_entity.dart';
-import 'package:intl/intl.dart'; // <-- ĐÃ THÊM
-// --- THÊM IMPORT CHO RoomEntity ---
+import 'package:intl/intl.dart'; 
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
-// ---------------------------------
 
 
 class BookingScreen extends StatefulWidget {
   final String hotelId;
   final String roomId;
   final double pricePerNight;
-  // --- THÊM 2 TRƯỜNG MỚI ---
   final DateTime checkIn;
   final DateTime checkOut;
 
@@ -25,8 +21,8 @@ class BookingScreen extends StatefulWidget {
     required this.hotelId,
     required this.roomId,
     required this.pricePerNight,
-    required this.checkIn, // <-- YÊU CẦU
-    required this.checkOut, // <-- YÊU CẦU
+    required this.checkIn, 
+    required this.checkOut, 
   });
 
   @override
@@ -34,8 +30,6 @@ class BookingScreen extends StatefulWidget {
 }
 
 class _BookingScreenState extends State<BookingScreen> {
-  // BỎ _checkIn, _checkOut từ initState
-
   Future<void> _createBooking(BuildContext context) async {
     final user = context.read<AuthService>().user;
     if (user == null) {
@@ -48,13 +42,9 @@ class _BookingScreenState extends State<BookingScreen> {
     // Lấy thông tin cần thiết từ providers
     // Nên dùng read vì thông tin này không thay đổi trong màn hình này
     final hotel = context.read<HotelProvider>().getHotelById(widget.hotelId);
-    // --- SỬA LỖI Ở ĐÂY: Gọi đúng hàm getRoomById ---
     final RoomEntity? room = context.read<RoomProvider>().getRoomById(widget.roomId); // <--- Kiểu trả về là RoomEntity?
-    // --- KẾT THÚC SỬA LỖI ---
 
-    // --- SỬA KIỂM TRA NULL ---
     if (hotel == null || room == null) { // Kiểm tra room == null
-    // --- KẾT THÚC SỬA ---
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lỗi: Không thể lấy thông tin phòng hoặc khách sạn.')),
       );
@@ -67,11 +57,9 @@ class _BookingScreenState extends State<BookingScreen> {
       hotelId: widget.hotelId,
       hotelName: hotel.name,   // Lấy tên hotel từ entity
       roomId: widget.roomId,
-      // --- TRUY CẬP room.type AN TOÀN ---
       roomType: room.type,    // Truy cập trực tiếp vì đã kiểm tra null ở trên
-      // --- KẾT THÚC SỬA ---
-      checkIn: widget.checkIn,   // <-- DÙNG BIẾN CỦA WIDGET
-      checkOut: widget.checkOut, // <-- DÙNG BIẾN CỦA WIDGET
+      checkIn: widget.checkIn,   
+      checkOut: widget.checkOut, 
       totalPrice: _calcTotal(),
       status: 'pending', // Trạng thái ban đầu
     );
@@ -121,9 +109,7 @@ class _BookingScreenState extends State<BookingScreen> {
 
     // Lấy tên KS và loại phòng để hiển thị (an toàn hơn)
     final hotelName = context.read<HotelProvider>().getHotelName(widget.hotelId) ?? 'Khách sạn';
-    // --- SỬA CÁCH LẤY roomType ---
     final roomType = context.read<RoomProvider>().getRoomType(widget.roomId) ?? 'Phòng'; // Dùng hàm getRoomType đã sửa
-    // --- KẾT THÚC SỬA ---
 
 
     return Scaffold(
@@ -208,7 +194,6 @@ class _BookingScreenState extends State<BookingScreen> {
                 ),
               ),
             ),
-            // ------------------------------------
 
             const Spacer(), // Đẩy nút xuống dưới cùng
 

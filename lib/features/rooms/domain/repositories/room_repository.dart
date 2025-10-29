@@ -1,5 +1,4 @@
-//import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
-import '../entities/room_entity.dart'; // <--- THÊM DÒNG NÀY
+import '../entities/room_entity.dart'; 
 abstract class RoomRepository {
   Future<List<RoomEntity>> fetchRooms(String hotelId);
   Future<List<RoomEntity>> getAvailableRooms(
@@ -8,6 +7,6 @@ abstract class RoomRepository {
     DateTime checkOut,
   );
   Future<void> createRoom(RoomEntity room);
-  Future<void> updateRoom(RoomEntity room); // <-- Đã thêm
-  Future<void> deleteRoom(String hotelId, String roomId); // <-- Đã thêm
+  Future<void> updateRoom(RoomEntity room); 
+  Future<void> deleteRoom(String hotelId, String roomId); 
 }

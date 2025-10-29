@@ -7,7 +7,6 @@ class ReviewRepositoryImpl implements ReviewRepository {
   final FirebaseFirestore _db;
   ReviewRepositoryImpl(this._db);
 
-  // Cấu trúc: /hotels/{hotelId}/reviews/{reviewId}
   CollectionReference _reviewsCol(String hotelId) =>
       _db.collection('hotels').doc(hotelId).collection('reviews');
 
@@ -29,7 +28,6 @@ class ReviewRepositoryImpl implements ReviewRepository {
       comment: review.comment,
       createdAt: DateTime.now(), // Ghi đè thời gian lúc tạo
     );
-    // Lưu ý: Cần thêm logic kiểm tra xem user này đã review khách sạn này chưa
     // Tạm thời cho phép review nhiều lần
     await _reviewsCol(review.hotelId).add(model.toMap());
   }

@@ -152,5 +152,4 @@ class _AdminBookingListPageState extends State<AdminBookingListPage> {
         return const SizedBox.shrink();
     }
   }
-  // ---------------------------------------
 }

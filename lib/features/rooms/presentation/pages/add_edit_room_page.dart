@@ -1,4 +1,3 @@
-// lib/features/rooms/presentation/pages/add_edit_room_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
@@ -26,7 +25,6 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
   late bool _isAvailable;
   bool _isLoading = false;
 
-  // --- THÊM CÁC BIẾN MỚI ---
   late final TextEditingController _imageUrlController; // Cho link ảnh
   late List<String> _imageUrls; // Danh sách link ảnh
   late List<String> _amenities; // Danh sách tiện ích
@@ -39,7 +37,6 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
     'View biển': Icons.beach_access,
     'Điều hòa': Icons.ac_unit,
   };
-  // -------------------------
 
   bool get _isEditing => widget.room != null;
 
@@ -52,12 +49,9 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
     _capacityController =
         TextEditingController(text: widget.room?.capacity.toString() ?? '2');
     _isAvailable = widget.room?.available ?? true;
-
-    // --- KHỞI TẠO CÁC BIẾN MỚI ---
     _imageUrlController = TextEditingController();
     _imageUrls = widget.room?.imageUrls.toList() ?? [];
     _amenities = widget.room?.amenities.toList() ?? [];
-    // ----------------------------
   }
 
   @override
@@ -69,7 +63,7 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
     super.dispose();
   }
 
-  // --- HÀM THÊM LINK ẢNH (SAO CHÉP TỪ ADDEDITHOTELPAGE) ---
+  // HÀM THÊM LINK ẢNH (SAO CHÉP TỪ ADDEDITHOTELPAGE) 
   void _addImageUrl() {
     final url = _imageUrlController.text.trim();
     if (url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'))) {
@@ -105,8 +99,8 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
         pricePerNight: double.tryParse(_priceController.text) ?? 0.0,
         capacity: int.tryParse(_capacityController.text) ?? 2,
         available: _isAvailable,
-        imageUrls: _imageUrls, // <-- LƯU TRƯỜNG MỚI
-        amenities: _amenities, // <-- LƯU TRƯỜNG MỚI
+        imageUrls: _imageUrls, 
+        amenities: _amenities, 
       );
 
       final provider = context.read<RoomProvider>();
@@ -190,8 +184,7 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
               contentPadding: EdgeInsets.zero, // Bỏ padding mặc định
             ),
 
-            // --- THÊM UI TIỆN ÍCH PHÒNG ---
-            const Divider(height: 32, thickness: 1), // Dày hơn
+            const Divider(height: 32, thickness: 1), 
             Text('Tiện ích phòng', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Wrap(
@@ -219,9 +212,8 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
                 );
               }).toList(),
             ),
-            // -----------------------------
 
-            // --- THÊM UI ẢNH PHÒNG ---
+            // THÊM UI ẢNH PHÒNG 
             const Divider(height: 32, thickness: 1),
             Text('Hình ảnh phòng (Link URL)', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
@@ -296,7 +288,6 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
                 ),
               ],
             ),
-            // ---------------------------
 
             const SizedBox(height: 32), // Tăng khoảng cách
             ElevatedButton(

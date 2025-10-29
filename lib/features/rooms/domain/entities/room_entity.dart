@@ -8,8 +8,8 @@ class RoomEntity extends Equatable {
   final double pricePerNight;
   final int capacity;
   final bool available;
-  final List<String> imageUrls; // <-- THÊM DÒNG NÀY
-  final List<String> amenities; // <-- THÊM DÒNG NÀY
+  final List<String> imageUrls; 
+  final List<String> amenities;
 
   const RoomEntity({
     required this.roomId,
@@ -18,8 +18,8 @@ class RoomEntity extends Equatable {
     required this.pricePerNight,
     required this.capacity,
     required this.available,
-    this.imageUrls = const [], // <-- THÊM GIÁ TRỊ MẶC ĐỊNH
-    this.amenities = const [], // <-- THÊM GIÁ TRỊ MẶC ĐỊNH
+    this.imageUrls = const [], 
+    this.amenities = const [], 
   });
 
   // Add empty factory constructor
@@ -44,7 +44,7 @@ class RoomEntity extends Equatable {
         pricePerNight,
         capacity,
         available,
-        imageUrls, // <-- THÊM VÀO
-        amenities, // <-- THÊM VÀO
+        imageUrls, 
+        amenities, 
       ];
 }

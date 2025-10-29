@@ -1,11 +1,9 @@
-// lib/features/rooms/data/repositories/room_repository_impl.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
 import 'package:doanflutter/features/rooms/domain/repositories/room_repository.dart';
 import 'package:doanflutter/features/rooms/data/models/room_model.dart';
-// --- THÊM IMPORT CHO BookingModel NẾU CHƯA CÓ ---
 import 'package:doanflutter/features/booking/data/models/booking_model.dart';
-// ------------------------------------
+
 
 class RoomRepositoryImpl implements RoomRepository {
   final FirebaseFirestore _db;

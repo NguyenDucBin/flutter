@@ -1,11 +1,9 @@
-// lib/features/hotel/presentation/pages/add_edit_hotel_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:doanflutter/features/hotel/domain/entities/hotel_entity.dart';
 import 'package:doanflutter/features/hotel/presentation/provider/hotel_provider.dart';
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
-// KHÔNG CẦN import storage_service.dart, image_picker, hoặc dart:typed_data nữa
+
 
 class AddEditHotelPage extends StatefulWidget {
   final HotelEntity? hotel;
@@ -149,7 +147,6 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
               maxLines: 3,
             ),
             
-            // --- UI TIỆN ÍCH (AMENITIES) - GIỮ NGUYÊN ---
             const SizedBox(height: 24),
             Text('Tiện ích', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
@@ -176,9 +173,8 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
                 );
               }).toList(),
             ),
-            // -----------------------------------------
 
-            // --- UI MỚI CHO HÌNH ẢNH (IMAGES) ---
+            //  UI CHO HÌNH ẢNH (IMAGES) 
             const SizedBox(height: 24),
             Text('Hình ảnh (Link URL)', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),

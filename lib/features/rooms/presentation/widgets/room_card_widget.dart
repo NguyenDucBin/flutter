@@ -1,4 +1,3 @@
-// lib/features/rooms/presentation/widgets/room_card_widget.dart
 import 'package:flutter/material.dart';
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
 import 'package:intl/intl.dart';

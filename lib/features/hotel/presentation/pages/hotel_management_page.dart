@@ -36,7 +36,6 @@ class _HotelManagementPageState extends State<HotelManagementPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // TODO: Mở trang/dialog Thêm Khách sạn mới
           // (Chuyển sang trang AddEditHotelPage)
           Navigator.push(
             context,

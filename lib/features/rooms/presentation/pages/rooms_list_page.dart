@@ -21,9 +21,7 @@ class _RoomsListPageState extends State<RoomsListPage> {
     super.initState();
     // Ngay khi trang được mở, gọi Provider để tải dữ liệu
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // --- SỬA TÊN HÀM Ở ĐÂY ---
       context.read<RoomProvider>().fetchAllRooms(widget.hotelId);
-      // ------------------------
     });
   }
 
@@ -31,9 +29,7 @@ class _RoomsListPageState extends State<RoomsListPage> {
   Widget build(BuildContext context) {
     // Lắng nghe thay đổi từ RoomProvider
     final roomProvider = context.watch<RoomProvider>();
-    // --- SỬA GETTER Ở ĐÂY ---
     final filteredRooms = roomProvider.allFilteredRoomsForAdmin;
-    // ----------------------
 
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
@@ -126,9 +122,7 @@ class _RoomsListPageState extends State<RoomsListPage> {
                                 ),
                               ),
                               subtitle: Text(
-                                // --- SỬA ĐỊNH DẠNG GIÁ ---
                                 'Price: ${NumberFormat.simpleCurrency(locale: 'vi_VN', decimalDigits: 0).format(room.pricePerNight)}', // Định dạng tiền tệ
-                                // --- KẾT THÚC SỬA ---
                                 style: const TextStyle(color: Colors.grey),
                               ),
                               trailing: PopupMenuButton<String>(

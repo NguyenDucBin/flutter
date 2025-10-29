@@ -317,19 +317,14 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
       );
     }
 
-    // Dùng ListView.builder nhưng KHÔNG có shrinkWrap và physics
-    // vì nó đã nằm trong ListView chính của trang rồi.
-    return Column( // Dùng Column thay vì ListView lồng nhau
+    return Column( 
       children: provider.filteredRooms.map((room) {
-        // TODO Giai đoạn 3: Logic kiểm tra phòng trống thực sự dựa trên ngày _checkIn, _checkOut
-        // Tạm thời vẫn dùng trường 'available' của phòng
         final bool isActuallyAvailable = room.available;
 
         return RoomCardWidget(
           room: room,
           isAvailable: true,
           onBookNowPressed: () {
-            // --- CẬP NHẬT ĐIỀU HƯỚNG ---
             Navigator.pushNamed(
               context,
               '/booking',
@@ -337,17 +332,15 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                 'hotelId': widget.hotel.id,
                 'roomId': room.roomId,
                 'pricePerNight': room.pricePerNight,
-                'checkIn': _checkIn,     // <-- TRUYỀN NGÀY ĐI
-                'checkOut': _checkOut, // <-- TRUYỀN NGÀY ĐI
+                'checkIn': _checkIn,     // TRUYỀN NGÀY ĐI
+                'checkOut': _checkOut, // TRUYỀN NGÀY ĐI
               },
             );
-            // -------------------------
           },
         );
       }).toList(),
     );
   }
-  // ---------------------------------------------
 
   // --- Hàm build danh sách review (Giữ nguyên) ---
   Widget _buildReviewList(BuildContext context, ReviewProvider provider) {

@@ -13,9 +13,7 @@ class ReportRepositoryImpl implements ReportRepository {
     required DateTime startDate,
     required DateTime endDate,
   }) async {
-    // 1. Truy vấn tất cả booking đã "confirmed" của chủ sở hữu
-    // trong khoảng thời gian đã cho.
-    // LƯU Ý: Giả sử 'ownerId' được lưu trong collection 'bookings'.
+    // lấy danh sách trong khoảng thời gian đã cho.
     final snapshot = await _db
         .collection('bookings')
         .where('ownerId', isEqualTo: ownerId)

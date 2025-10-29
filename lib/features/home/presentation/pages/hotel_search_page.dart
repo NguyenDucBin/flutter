@@ -4,9 +4,8 @@ import 'package:doanflutter/features/hotel/presentation/provider/hotel_provider.
 import 'package:doanflutter/features/hotel/domain/entities/hotel_entity.dart';
 import 'package:doanflutter/features/hotel/presentation/pages/hotel_detail_page.dart';
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
-// --- THÊM IMPORT CHO INT_L ---
 import 'package:intl/intl.dart';
-// -----------------------------
+
 
 class HotelSearchPage extends StatefulWidget {
   const HotelSearchPage({super.key});
@@ -16,13 +15,6 @@ class HotelSearchPage extends StatefulWidget {
 }
 
 class _HotelSearchPageState extends State<HotelSearchPage> {
-  // --- BỎ STATE CỤC BỘ, SẼ DÙNG TỪ PROVIDER ---
-  // final TextEditingController _searchController = TextEditingController();
-  // double _minPrice = 0;
-  // double _maxPrice = 9000000;
-  // final List<String> _selectedFilters = [];
-  // ------------------------------------------
-
   // Danh sách tiện ích (để render UI)
   final List<String> _allAmenities = ['Wifi', 'Hồ bơi', 'Bãi đỗ xe', 'Nhà hàng', 'Gym', 'Spa'];
 
@@ -37,11 +29,9 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
   }
 
   Widget _buildFilterSidebar(BuildContext context) { // Thêm BuildContext context
-    // --- LẤY STATE TỪ PROVIDER ---
     final provider = context.watch<HotelProvider>();
     final priceRange = provider.priceRange;
     final selectedAmenities = provider.selectedAmenities;
-    // -----------------------------
 
     return Container(
       width: 300,
@@ -65,9 +55,7 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
                  NumberFormat.compactSimpleCurrency(locale: 'vi_VN', decimalDigits: 0).format(priceRange.end >= 10000000 ? 10000000 : priceRange.end), // Giới hạn max label
               ),
               onChanged: (values) {
-                // --- CẬP NHẬT PROVIDER KHI KÉO ---
                 context.read<HotelProvider>().setPriceRange(values);
-                // -------------------------------
               },
             ),
             const SizedBox(height: 8),
@@ -80,9 +68,7 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
                         label: Text(t),
                         selected: selectedAmenities.contains(t), // Dùng provider
                         onSelected: (sel) {
-                          // --- CẬP NHẬT PROVIDER KHI CHỌN ---
                           context.read<HotelProvider>().toggleAmenity(t);
-                          // ----------------------------------
                         },
                       ))
                   .toList(),
@@ -100,10 +86,8 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
 
   Widget _buildHotelCardFromEntity(HotelEntity hotel) {
     final image = (hotel.imageUrls.isNotEmpty) ? hotel.imageUrls.first : null;
-    // --- SỬA ĐỊNH DẠNG TIỀN TỆ ---
     final currencyFormat =
         NumberFormat.simpleCurrency(locale: 'vi_VN', decimalDigits: 0);
-    // ----------------------------
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -133,9 +117,6 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
                   const SizedBox(height: 6),
                   Text(hotel.address, style: TextStyle(color: Colors.grey[700])),
                   const SizedBox(height: 8),
-                  // Bỏ mô tả (description) vì nó dài
-                  // Text(hotel.description ?? '', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.black87)),
-                  // const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -147,23 +128,18 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
                             children: [
                               const Icon(Icons.star, color: Colors.blue, size: 14),
                               const SizedBox(width: 4),
-                              // --- HIỂN THỊ RATING TỪ ENTITY ---
                               Text(hotel.avgRating.toStringAsFixed(1),
                                   style: const TextStyle(color: Colors.blue)),
-                              // --------------------------------
                             ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // --- HIỂN THỊ SỐ REVIEW TỪ ENTITY ---
                         Text('${hotel.reviewCount} reviews',
                             style: const TextStyle(color: Colors.grey)),
-                        // ----------------------------------
                       ]),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          // --- HIỂN THỊ GIÁ TỪ ENTITY ---
                           Text(
                             currencyFormat.format(hotel.minPrice), // Dùng định dạng tiền tệ
                             style: const TextStyle(
@@ -172,7 +148,6 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
                           const Text('/ đêm',
                               style:
                                   TextStyle(color: Colors.grey, fontSize: 12)),
-                          // ------------------------------
                           const SizedBox(height: 6),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
@@ -206,19 +181,10 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
   }
 
   Widget _buildResultsList(List<HotelEntity> hotels) {
-    // --- BỎ LOGIC LỌC CŨ ---
-    // final filtered = hotels.where((h) {
-    //   // Lọc cơ bản: hiện tại chỉ áp giá giả (nếu có trường giá trong entity -> dùng)
-    //   return true;
-    // }).toList();
-    // -----------------------
-
     if (hotels.isEmpty) { // Dùng thẳng list hotels (đã được lọc từ provider)
       return const Center(child: Padding(
         padding: EdgeInsets.all(24.0),
-        // --- SỬA LẠI THÔNG BÁO ---
         child: Text('Không tìm thấy khách sạn phù hợp với bộ lọc.', style: TextStyle(color: Colors.grey)),
-        // -------------------------
       ));
     }
 
@@ -234,7 +200,6 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
     final provider = context.watch<HotelProvider>();
     // --- DANH SÁCH HIỂN THỊ LÀ provider.filteredHotels ---
     final hotels = provider.filteredHotels;
-    // --------------------------------------------------
 
     return Scaffold(
       drawer: Drawer(child: _buildFilterSidebar(context)), // Truyền context
@@ -254,13 +219,9 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
                   contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
                 ),
-                // --- SỬA onChanged THAY VÌ onSubmitted ---
                 onChanged: (q) {
-                  // --- GỌI PROVIDER KHI GÕ ---
                   context.read<HotelProvider>().setSearchQuery(q);
-                  // ---------------------------
                 },
-                // --------------------------------------
               ),
             ),
             const SizedBox(width: 12),
