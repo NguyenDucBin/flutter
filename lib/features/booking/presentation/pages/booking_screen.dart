@@ -5,7 +5,7 @@ import 'package:doanflutter/features/hotel/presentation/provider/hotel_provider.
 import 'package:doanflutter/features/rooms/presentation/provider/room_provider.dart';
 import 'package:doanflutter/features/booking/presentation/provider/booking_provider.dart';
 import 'package:doanflutter/features/booking/domain/entities/booking_entity.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
 
 
@@ -21,8 +21,8 @@ class BookingScreen extends StatefulWidget {
     required this.hotelId,
     required this.roomId,
     required this.pricePerNight,
-    required this.checkIn, 
-    required this.checkOut, 
+    required this.checkIn,
+    required this.checkOut,
   });
 
   @override
@@ -36,15 +36,13 @@ class _BookingScreenState extends State<BookingScreen> {
        ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Vui lòng đăng nhập lại.')),
       );
-      return; // Nên kiểm tra sớm
+      return;
     }
 
-    // Lấy thông tin cần thiết từ providers
-    // Nên dùng read vì thông tin này không thay đổi trong màn hình này
     final hotel = context.read<HotelProvider>().getHotelById(widget.hotelId);
-    final RoomEntity? room = context.read<RoomProvider>().getRoomById(widget.roomId); // <--- Kiểu trả về là RoomEntity?
+    final RoomEntity? room = context.read<RoomProvider>().getRoomById(widget.roomId);
 
-    if (hotel == null || room == null) { // Kiểm tra room == null
+    if (hotel == null || room == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Lỗi: Không thể lấy thông tin phòng hoặc khách sạn.')),
       );
@@ -53,48 +51,53 @@ class _BookingScreenState extends State<BookingScreen> {
 
     final booking = BookingEntity(
       userId: user.uid,
-      ownerId: hotel.ownerId, // Lấy ownerId từ hotel entity
+      ownerId: hotel.ownerId,
       hotelId: widget.hotelId,
-      hotelName: hotel.name,   // Lấy tên hotel từ entity
+      hotelName: hotel.name,
       roomId: widget.roomId,
-      roomType: room.type,    // Truy cập trực tiếp vì đã kiểm tra null ở trên
-      checkIn: widget.checkIn,   
-      checkOut: widget.checkOut, 
+      roomType: room.type,
+      checkIn: widget.checkIn,
+      checkOut: widget.checkOut,
       totalPrice: _calcTotal(),
-      status: 'pending', // Trạng thái ban đầu
+      status: 'pending',
     );
 
+    // <<<=== SỬA TỪ ĐÂY ===>>>
+    String? successMessage; // Biến lưu thông báo thành công
+    String? errorMessage; // Biến lưu thông báo lỗi
+
     try {
-      // Lấy provider (dùng read vì chỉ gọi hàm)
       final provider = context.read<BookingProvider>();
       await provider.createBooking(booking);
-
-      // Kiểm tra `mounted` trước khi dùng context trong hàm async
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đặt phòng thành công!'), backgroundColor: Colors.green),
-        );
-        // Điều hướng về màn hình chính của user (ví dụ: '/home') sau khi đặt thành công
-        // popUntil('/') sẽ xóa hết các trang trên '/'
-        Navigator.of(context).popUntil(ModalRoute.withName('/home'));
-        // TODO: Chuyển sang tab "Chuyến đi" trên UserHomePage nếu cần
-      }
+      successMessage = 'Đặt phòng thành công!'; // Ghi nhận thành công
     } catch (e) {
-      // Xử lý lỗi (ví dụ: phòng đã được đặt)
-       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đặt phòng thất bại: ${e.toString()}'), backgroundColor: Colors.red),
-        );
-      }
+      errorMessage = 'Đặt phòng thất bại: ${e.toString()}'; // Ghi nhận lỗi
     }
-    // Không cần finally vì provider tự xử lý isCreatingBooking
+
+    // --- Xử lý hiển thị SnackBar và điều hướng SAU KHI await kết thúc ---
+    if (!mounted) return; // Kiểm tra mounted một lần nữa sau await
+
+    if (successMessage != null) {
+      // Hiển thị SnackBar thành công TRƯỚC khi điều hướng
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(successMessage), backgroundColor: Colors.green),
+      );
+      // Điều hướng về trang chủ ('/') và xóa hết stack cũ
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (Route<dynamic> route) => false);
+      // TODO (Nâng cao): Thêm cơ chế để UserHomePage tự động chuyển sang tab "Chuyến đi"
+      // Ví dụ: Dùng GlobalKey hoặc Provider/Stream để gửi tín hiệu
+    } else if (errorMessage != null) {
+      // Hiển thị SnackBar lỗi (Không điều hướng khi lỗi)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
+      );
+    }
+    // <<<=== KẾT THÚC SỬA ===>>>
   }
 
   // Hàm tính tổng tiền (chính xác hơn)
   double _calcTotal() {
-    // Tính số đêm (luôn dương)
     final nights = widget.checkOut.difference(widget.checkIn).inDays;
-    // Đảm bảo ít nhất 1 đêm nếu checkIn và checkOut cùng ngày (ít xảy ra)
     final totalNights = (nights <= 0) ? 1 : nights;
     return widget.pricePerNight * totalNights;
   }
@@ -109,13 +112,13 @@ class _BookingScreenState extends State<BookingScreen> {
 
     // Lấy tên KS và loại phòng để hiển thị (an toàn hơn)
     final hotelName = context.read<HotelProvider>().getHotelName(widget.hotelId) ?? 'Khách sạn';
-    final roomType = context.read<RoomProvider>().getRoomType(widget.roomId) ?? 'Phòng'; // Dùng hàm getRoomType đã sửa
+    final roomType = context.read<RoomProvider>().getRoomType(widget.roomId) ?? 'Phòng';
 
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Xác nhận Đặt phòng'),
-        backgroundColor: Colors.indigo, // Màu nhất quán
+        backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
       ),
       body: Padding(
@@ -126,21 +129,21 @@ class _BookingScreenState extends State<BookingScreen> {
             Text('Vui lòng kiểm tra lại thông tin:', style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 16),
 
-            // --- HIỂN THỊ THÔNG TIN ĐẶT PHÒNG ---
+            // Card thông tin đặt phòng (giữ nguyên)
             Card(
               elevation: 2,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: Padding(
-                padding: const EdgeInsets.all(16.0), // Padding chung cho Card
+                padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, // Căn trái các mục
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Thông tin khách sạn/phòng
                     Row(
                       children: [
                         const Icon(Icons.business_outlined, color: Colors.indigo, size: 20),
                         const SizedBox(width: 8),
-                        Expanded( // Cho phép tên dài xuống dòng
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -151,7 +154,7 @@ class _BookingScreenState extends State<BookingScreen> {
                         ),
                       ],
                     ),
-                    const Divider(height: 24), // Tăng chiều cao Divider
+                    const Divider(height: 24),
 
                     // Ngày nhận phòng
                     _buildBookingInfoRow(
@@ -160,7 +163,7 @@ class _BookingScreenState extends State<BookingScreen> {
                       label: 'Nhận phòng',
                       value: dateFormat.format(widget.checkIn),
                     ),
-                    const SizedBox(height: 12), // Khoảng cách giữa các dòng
+                    const SizedBox(height: 12),
 
                     // Ngày trả phòng
                     _buildBookingInfoRow(
@@ -186,42 +189,44 @@ class _BookingScreenState extends State<BookingScreen> {
                       iconColor: Colors.orange,
                       label: 'Tổng cộng',
                       value: currencyFormat.format(_calcTotal()),
-                      isValueBold: true, // Làm đậm giá tiền
-                      valueColor: Colors.indigo, // Màu giá tiền
-                      valueSize: 18, // Cỡ chữ giá tiền
+                      isValueBold: true,
+                      valueColor: Colors.indigo,
+                      valueSize: 18,
                     ),
                   ],
                 ),
               ),
             ),
 
-            const Spacer(), // Đẩy nút xuống dưới cùng
+            const Spacer(),
 
+            // Nút xác nhận (giữ nguyên)
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.indigo,
                   foregroundColor: Colors.white,
-                  minimumSize: const Size(double.infinity, 50), // Nút to hơn
+                  minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                ),
               onPressed: bookingProvider.isCreatingBooking
-                  ? null // Vô hiệu hóa nút khi đang xử lý
+                  ? null
                   : () => _createBooking(context),
               child: bookingProvider.isCreatingBooking
-                  ? const SizedBox( // Spinner nhỏ hơn
+                  ? const SizedBox(
                         height: 24,
                         width: 24,
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
                       )
                   : const Text('Xác nhận & Đặt phòng', style: TextStyle(fontSize: 16)),
             ),
-             const SizedBox(height: 16), // Khoảng trống dưới nút
+             const SizedBox(height: 16),
           ],
         ),
       ),
     );
   }
 
+  // Hàm _buildBookingInfoRow (giữ nguyên)
   Widget _buildBookingInfoRow({
     required IconData icon,
     required Color iconColor,
@@ -231,7 +236,8 @@ class _BookingScreenState extends State<BookingScreen> {
     Color? valueColor,
     double? valueSize,
   }) {
-    return Row(
+    // ... (Giữ nguyên code của hàm này)
+     return Row(
       children: [
         Icon(icon, color: iconColor, size: 20),
         const SizedBox(width: 8),
