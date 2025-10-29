@@ -21,25 +21,13 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -61,4 +49,41 @@ class DefaultFirebaseOptions {
     storageBucket: 'doanflutter-bec18.firebasestorage.app',
     measurementId: 'G-QCDN0F3GM8',
   );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAdRH0cGOKvBFqeUebtK6X5cGm5Ei575Ss',
+    appId: '1:287632544949:ios:5e81e0ed9c30d31d4e5afc',
+    messagingSenderId: '287632544949',
+    projectId: 'doanflutter-bec18',
+    storageBucket: 'doanflutter-bec18.firebasestorage.app',
+    iosBundleId: 'com.example.doanflutter',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyAdRH0cGOKvBFqeUebtK6X5cGm5Ei575Ss',
+    appId: '1:287632544949:ios:5e81e0ed9c30d31d4e5afc',
+    messagingSenderId: '287632544949',
+    projectId: 'doanflutter-bec18',
+    storageBucket: 'doanflutter-bec18.firebasestorage.app',
+    iosBundleId: 'com.example.doanflutter',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyA0CbapqnHlj_XUPLZjHsNCtt2VKJ5itxg',
+    appId: '1:287632544949:android:7b41f1743062910e4e5afc',
+    messagingSenderId: '287632544949',
+    projectId: 'doanflutter-bec18',
+    storageBucket: 'doanflutter-bec18.firebasestorage.app',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyC2wQ5Bof2CebGj_2RWQ-NXO_0rSgj35No',
+    appId: '1:287632544949:web:584fd3ddf9bb99bb4e5afc',
+    messagingSenderId: '287632544949',
+    projectId: 'doanflutter-bec18',
+    authDomain: 'doanflutter-bec18.firebaseapp.com',
+    storageBucket: 'doanflutter-bec18.firebasestorage.app',
+    measurementId: 'G-V3VQTP7EP6',
+  );
+
 }

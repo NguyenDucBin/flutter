@@ -1,3 +1,5 @@
+// lib/features/auth/data/datasources/auth_firebase_datasource.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -20,12 +22,13 @@ class AuthFirebaseDataSource {
     await _auth.signOut();
   }
 
+  // --- SỬA HÀM NÀY: Bỏ tham số 'role' VÀ đặt cứng 'customer' ---
   // Đăng ký
   Future<void> signUp({
     required String name,
     required String email,
     required String password,
-    required String role,
+    // required String role, // <-- ĐÃ XÓA
   }) async {
     // 1. Tạo user trong Firebase Auth
     UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
@@ -41,7 +44,7 @@ class AuthFirebaseDataSource {
       'uid': uid,
       'name': name,
       'email': email,
-      'role': role, // Lưu vai trò đã chọn
+      'role': 'customer', // <-- SỬA Ở ĐÂY: Mặc định là 'customer'
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
@@ -54,15 +57,6 @@ class AuthFirebaseDataSource {
         return (doc.data() as Map<String, dynamic>)['role'];
       }
       return null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  Future<Map<String, dynamic>?> getUserData(String uid) async {
-    try {
-      final doc = await _firestore.collection('users').doc(uid).get();
-      return doc.data();
     } catch (e) {
       return null;
     }

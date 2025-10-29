@@ -55,7 +55,8 @@ class HotelProvider extends ChangeNotifier {
 
   // --- GETTER MỚI CHO DANH SÁCH ĐÃ LỌC ---
   List<HotelEntity> get filteredHotels {
-    List<HotelEntity> filtered = List.from(_allHotels);
+    // SỬA LỖI Gõ: Dùng List.from(_allHotels) để tạo bản sao mới
+    List<HotelEntity> filtered = List<HotelEntity>.from(_allHotels);
 
     // 1. Lọc theo tên
     if (_searchQuery.isNotEmpty) {
@@ -90,7 +91,9 @@ class HotelProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      _allHotels = await _hotelRepository.fetchAllHotels();
+      // SỬA LỖI Gõ: Ép kiểu tường minh sang List<HotelEntity>
+      final fetchedHotels = await _hotelRepository.fetchAllHotels();
+      _allHotels = List<HotelEntity>.from(fetchedHotels);
     } catch (e) {
       _error = e.toString();
     }
@@ -104,7 +107,9 @@ class HotelProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      _myHotels = await _hotelRepository.fetchHotelsForOwner(ownerId);
+      // SỬA LỖI Gõ: Ép kiểu tường minh sang List<HotelEntity>
+      final fetchedHotels = await _hotelRepository.fetchHotelsForOwner(ownerId);
+      _myHotels = List<HotelEntity>.from(fetchedHotels);
     } catch (e) {
       _error = e.toString();
     }
@@ -114,11 +119,16 @@ class HotelProvider extends ChangeNotifier {
 
   // Action: Thêm khách sạn (cho Admin)
   Future<void> createHotel(HotelEntity hotel) async {
+    // Lấy ownerId ra trước vì `hotel` có thể bị thay đổi
+    final ownerId = hotel.ownerId;
     try {
       await _hotelRepository.createHotel(hotel);
-      // Thêm vào danh sách UI và thông báo
-      _myHotels.add(hotel); // Cần có ID trả về, tạm thời thêm
-      notifyListeners();
+      
+      // SỬA LỖI LOGIC: Không thêm `hotel` vào list
+      // Thay vào đó, tải lại danh sách để lấy ID mới từ Firestore
+      await fetchMyHotels(ownerId);
+      // fetchMyHotels đã bao gồm notifyListeners()
+
     } catch (e) {
       _error = e.toString();
       notifyListeners();
@@ -130,7 +140,7 @@ class HotelProvider extends ChangeNotifier {
   Future<void> deleteHotel(String hotelId) async {
     try {
       await _hotelRepository.deleteHotel(hotelId);
-      // Xóa khỏi danh sách UI và thông báo
+      // Xóa khỏi danh sách UI và thông báo (Cách này ổn)
       _myHotels.removeWhere((h) => h.id == hotelId);
       notifyListeners();
     } catch (e) {
@@ -149,8 +159,13 @@ class HotelProvider extends ChangeNotifier {
       await _hotelRepository.updateHotel(hotel);
       final index = _myHotels.indexWhere((h) => h.id == hotel.id);
       if (index != -1) {
+        // Cập nhật UI (Cách này ổn vì đã fix lỗi ép kiểu ở fetchMyHotels)
         _myHotels[index] = hotel;
       }
+      
+      // Cập nhật lại cả danh sách public
+      await fetchAllHotels();
+
     } catch (e) {
       _error = e.toString();
       throw Exception(e);
@@ -181,9 +196,15 @@ class HotelProvider extends ChangeNotifier {
   // Helper: Lấy thông tin khách sạn từ ID
   HotelEntity? getHotelById(String hotelId) {
     try {
+      // Nên tìm trong _allHotels vì nó chứa tất cả
       return _allHotels.firstWhere((h) => h.id == hotelId);
     } catch (e) {
-      return null;
+      // Nếu không thấy, thử tìm trong _myHotels (phòng trường hợp)
+      try {
+         return _myHotels.firstWhere((h) => h.id == hotelId);
+      } catch (e) {
+        return null;
+      }
     }
   }
 }

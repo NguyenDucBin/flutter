@@ -1,3 +1,5 @@
+// lib/features/auth/presentation/pages/sign_up_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
@@ -16,7 +18,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController(); // Controller for confirmation
-  String _selectedRole = 'customer'; // Default role
+  // String _selectedRole = 'customer'; // <-- ĐÃ XÓA
   bool _obscurePassword = true; // State for password visibility
   bool _obscureConfirmPassword = true; // State for confirm password visibility
 
@@ -47,11 +49,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
     final authService = context.read<AuthService>();
     try {
+      // --- SỬA Ở ĐÂY: Bỏ _selectedRole ---
       await authService.signUp(
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text.trim(),
-        _selectedRole,
+        // _selectedRole, // <-- ĐÃ XÓA
       );
       // AuthGate will handle navigation after successful sign-up
       if (mounted) {
@@ -272,31 +275,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                         const SizedBox(height: 16),
 
-                         // --- Role Selection ---
-                         DropdownButtonFormField<String>(
-                           value: _selectedRole,
-                           decoration: InputDecoration(
-                             labelText: 'Bạn là',
-                              prefixIcon: Icon(Icons.account_circle_outlined, color: theme.primaryColor.withOpacity(0.7)),
-                             border: OutlineInputBorder(
-                               borderRadius: BorderRadius.circular(12.0),
-                             ),
-                             filled: true,
-                             fillColor: Colors.grey[100],
-                             contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12), // Consistent padding
-                           ),
-                           items: const [
-                             DropdownMenuItem(value: 'customer', child: Text('Khách hàng')),
-                             DropdownMenuItem(value: 'admin', child: Text('Chủ khách sạn (Admin)')),
-                           ],
-                           onChanged: (value) {
-                             if (value != null) {
-                               setState(() => _selectedRole = value);
-                             }
-                           },
-                           // Optional: Add validator if needed, though default covers it
-                           // validator: (value) => value == null ? 'Vui lòng chọn vai trò' : null,
-                         ),
+                         // --- Role Selection --- (ĐÃ BỊ XÓA)
+                         // DropdownButtonFormField<String>( ... ),
+                        
                         const SizedBox(height: 24), // Spacing before button
 
                         // --- Sign Up Button ---

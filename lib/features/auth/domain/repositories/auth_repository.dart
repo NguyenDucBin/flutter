@@ -1,3 +1,5 @@
+// lib/features/auth/domain/repositories/auth_repository.dart
+
 import 'package:doanflutter/features/auth/domain/entities/user_entity.dart';
 
 // Đây là "hợp đồng" (contract) cho tầng Data
@@ -8,12 +10,13 @@ abstract class AuthRepository {
   // Đăng nhập
   Future<void> signIn({required String email, required String password});
 
+  // --- SỬA HÀM NÀY: Bỏ tham số 'role' ---
   // Đăng ký (quan trọng: truyền cả 'name' và 'role')
   Future<void> signUp({
     required String name,
     required String email,
     required String password,
-    required String role,
+    // required String role, // <-- ĐÃ XÓA
   });
 
   // Đăng xuất

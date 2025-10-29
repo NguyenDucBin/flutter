@@ -1,3 +1,5 @@
+// lib/features/auth/presentation/provider/auth_service.dart
+
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -67,8 +69,9 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  // --- SỬA HÀM NÀY: Bỏ tham số 'role' ---
   // Hàm Đăng ký
-  Future<void> signUp(String name, String email, String password, String role) async {
+  Future<void> signUp(String name, String email, String password) async {
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -77,7 +80,7 @@ class AuthService extends ChangeNotifier {
         name: name,
         email: email,
         password: password,
-        role: role,
+        // role: role, // <-- ĐÃ XÓA
       );
       // Stream sẽ tự động cập nhật
     } catch (e) {

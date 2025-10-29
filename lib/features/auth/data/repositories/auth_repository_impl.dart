@@ -1,3 +1,5 @@
+// lib/features/auth/data/repositories/auth_repository_impl.dart
+
 import 'package:doanflutter/features/auth/data/datasources/auth_firebase_datasource.dart';
 import 'package:doanflutter/features/auth/domain/entities/user_entity.dart';
 import 'package:doanflutter/features/auth/domain/repositories/auth_repository.dart';
@@ -9,22 +11,24 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Stream<UserEntity?> get user {
+    // Luồng này phức tạp:
+    // 1. Lắng nghe thay đổi từ Auth (userStream)
+    // 2. Khi có user, dùng 'asyncMap' để gọi Firestore (getUserRole)
+    // 3. Trả về UserEntity hoàn chỉnh
     return _dataSource.userStream.asyncMap((firebaseUser) async {
       if (firebaseUser == null) {
         return null; // Không có ai đăng nhập
       }
 
-      // Lấy dữ liệu (name, role) từ Firestore bằng hàm mới
-      final userData = await _dataSource.getUserData(firebaseUser.uid);
+      // Lấy vai trò (role) từ Firestore
+      final role = await _dataSource.getUserRole(firebaseUser.uid);
 
       // Trả về UserEntity hoàn chỉnh
       return UserEntity(
         uid: firebaseUser.uid,
         email: firebaseUser.email,
-        // DÙNG userData?['name']
-        name: userData?['name'] ?? firebaseUser.displayName, 
-        // DÙNG userData?['role']
-        role: userData?['role'] ?? 'customer', 
+        name: firebaseUser.displayName, // (Bạn có thể cập nhật name khi đăng ký)
+        role: role ?? 'customer', // Mặc định là 'customer' nếu có lỗi
       );
     });
   }
@@ -34,18 +38,19 @@ class AuthRepositoryImpl implements AuthRepository {
     return _dataSource.signIn(email: email, password: password);
   }
 
+  // --- SỬA HÀM NÀY: Bỏ tham số 'role' ---
   @override
   Future<void> signUp({
     required String name,
     required String email,
     required String password,
-    required String role,
+    // required String role, // <-- ĐÃ XÓA
   }) {
     return _dataSource.signUp(
       name: name,
       email: email,
       password: password,
-      role: role,
+      // role: role, // <-- ĐÃ XÓA
     );
   }
 

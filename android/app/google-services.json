@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "287632544949",
+    "project_id": "doanflutter-bec18",
+    "storage_bucket": "doanflutter-bec18.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287632544949:android:7b41f1743062910e4e5afc",
+        "android_client_info": {
+          "package_name": "com.example.doanflutter"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0CbapqnHlj_XUPLZjHsNCtt2VKJ5itxg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
