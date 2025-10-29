@@ -40,16 +40,16 @@ class HotelRepositoryImpl implements HotelRepository {
 
   @override
   Future<void> updateHotel(HotelEntity hotel) async {
-    final model = HotelModel(
-      id: hotel.id,
-      ownerId: hotel.ownerId,
-      name: hotel.name,
-      address: hotel.address,
-      description: hotel.description,
-      imageUrls: hotel.imageUrls,
-      amenities: hotel.amenities,
-    );
-    await _hotelsCol.doc(hotel.id).update(model.toMap());
+    final dataToUpdate = {
+      'ownerId': hotel.ownerId,
+      'name': hotel.name,
+      'address': hotel.address,
+      'description': hotel.description,
+      'imageUrls': hotel.imageUrls,
+      'amenities': hotel.amenities,
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+    await _hotelsCol.doc(hotel.id).update(dataToUpdate);
   }
 
   @override
@@ -69,5 +69,10 @@ class HotelRepositoryImpl implements HotelRepository {
 
     // 4. Execute all deletes in one atomic operation
     await batch.commit();
+  }
+
+  @override
+  Future<void> updateHotelMinPrice(String hotelId, double minPrice) async {
+    await _hotelsCol.doc(hotelId).update({'minPrice': minPrice});
   }
 }

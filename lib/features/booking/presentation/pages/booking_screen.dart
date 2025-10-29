@@ -62,7 +62,6 @@ class _BookingScreenState extends State<BookingScreen> {
       status: 'pending',
     );
 
-    // <<<=== SỬA TỪ ĐÂY ===>>>
     String? successMessage; // Biến lưu thông báo thành công
     String? errorMessage; // Biến lưu thông báo lỗi
 
@@ -74,7 +73,7 @@ class _BookingScreenState extends State<BookingScreen> {
       errorMessage = 'Đặt phòng thất bại: ${e.toString()}'; // Ghi nhận lỗi
     }
 
-    // --- Xử lý hiển thị SnackBar và điều hướng SAU KHI await kết thúc ---
+    // Xử lý hiển thị SnackBar và điều hướng SAU KHI await kết thúc 
     if (!mounted) return; // Kiểm tra mounted một lần nữa sau await
 
     if (successMessage != null) {
@@ -92,7 +91,6 @@ class _BookingScreenState extends State<BookingScreen> {
         SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
       );
     }
-    // <<<=== KẾT THÚC SỬA ===>>>
   }
 
   // Hàm tính tổng tiền (chính xác hơn)

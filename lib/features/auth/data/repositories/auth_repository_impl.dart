@@ -9,24 +9,22 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Stream<UserEntity?> get user {
-    // Luồng này phức tạp:
-    // 1. Lắng nghe thay đổi từ Auth (userStream)
-    // 2. Khi có user, dùng 'asyncMap' để gọi Firestore (getUserRole)
-    // 3. Trả về UserEntity hoàn chỉnh
     return _dataSource.userStream.asyncMap((firebaseUser) async {
       if (firebaseUser == null) {
         return null; // Không có ai đăng nhập
       }
 
-      // Lấy vai trò (role) từ Firestore
-      final role = await _dataSource.getUserRole(firebaseUser.uid);
+      // Lấy dữ liệu (name, role) từ Firestore bằng hàm mới
+      final userData = await _dataSource.getUserData(firebaseUser.uid);
 
       // Trả về UserEntity hoàn chỉnh
       return UserEntity(
         uid: firebaseUser.uid,
         email: firebaseUser.email,
-        name: firebaseUser.displayName, // (Bạn có thể cập nhật name khi đăng ký)
-        role: role ?? 'customer', // Mặc định là 'customer' nếu có lỗi
+        // DÙNG userData?['name']
+        name: userData?['name'] ?? firebaseUser.displayName, 
+        // DÙNG userData?['role']
+        role: userData?['role'] ?? 'customer', 
       );
     });
   }

@@ -1,5 +1,5 @@
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
-import 'package:doanflutter/features/booking/domain/entities/booking_entity.dart'; 
+import 'package:doanflutter/features/booking/domain/entities/booking_entity.dart';
 import 'package:doanflutter/features/booking/presentation/provider/booking_provider.dart';
 import 'package:doanflutter/features/reviews/domain/entities/review_entity.dart';
 import 'package:doanflutter/features/reviews/presentation/provider/review_provider.dart';
@@ -111,13 +111,14 @@ class _BookingListPageState extends State<BookingListPage>
           user,
           'Chưa có chuyến đi nào sắp tới.',
         ),
-        // Tab "Đã qua" - dùng getter completedBookings
-        _buildBookingTab(
+        // Tab "Đã qua" - dùng getter completedBookings VÀ HÀM MỚI
+        _buildCompletedBookingTab(
           context,
           provider.completedBookings,
           user,
           'Bạn chưa hoàn thành chuyến đi nào.',
         ),
+
         // Tab "Đã hủy" - dùng getter cancelledBookings
         _buildBookingTab(
           context,
@@ -161,9 +162,47 @@ class _BookingListPageState extends State<BookingListPage>
                   },
                   child: BookingCard(booking: booking)),
               // Nút review chỉ hiển thị ở tab "Đã qua" VÀ khi status là 'checked_out'
-              // (Điều kiện này đã đúng trong hàm initState của bạn)
+              // (Hàm này giờ chỉ dùng cho tab "Sắp tới" và "Đã hủy", nên if này sẽ không bao giờ true)
               if (booking.status == 'checked_out')
                 _buildReviewButton(context, booking, user),
+            ],
+          );
+        },
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
+      ),
+    );
+  }
+
+  // Hàm này dành riêng cho tab "Đã qua"
+  Widget _buildCompletedBookingTab(BuildContext context,
+      List<BookingEntity> bookings, dynamic user, String emptyMessage) {
+    if (bookings.isEmpty) {
+      return _buildEmptyState(emptyMessage);
+    }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        if (user != null) {
+          await context.read<BookingProvider>().fetchMyBookings(user.uid);
+        }
+      },
+      child: ListView.separated(
+        padding: const EdgeInsets.all(16.0),
+        itemCount: bookings.length,
+        itemBuilder: (context, index) {
+          final booking = bookings[index];
+          return Column(
+            children: [
+              GestureDetector(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content:
+                            Text('Xem chi tiết cho: ${booking.hotelName}')));
+                  },
+                  child: BookingCard(booking: booking)),
+                  
+              // SỬA ĐỔI: Luôn hiển thị nút review vì đây là tab "Đã qua"
+              _buildReviewButton(context, booking, user),
             ],
           );
         },
@@ -201,25 +240,27 @@ class _BookingListPageState extends State<BookingListPage>
 
   // (Hàm _buildReviewButton và _showReviewDialog giữ nguyên từ file bạn cung cấp)
   //review button
-  Widget _buildReviewButton(BuildContext context, dynamic booking, dynamic user) {
-     return Container(
+  Widget _buildReviewButton(
+      BuildContext context, dynamic booking, dynamic user) {
+    return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(12),
-          bottomRight: Radius.circular(12),
-        )
-      ),
+          color: Colors.grey[100],
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(12),
+            bottomRight: Radius.circular(12),
+          )),
       child: TextButton.icon(
         icon: const Icon(Icons.star, color: Colors.amber),
-        label: const Text('Viết đánh giá', style: TextStyle(color: Colors.black87)),
+        label:
+            const Text('Viết đánh giá', style: TextStyle(color: Colors.black87)),
         onPressed: () {
           _showReviewDialog(context, booking, user);
         },
       ),
     );
   }
+
   //review dialog
   void _showReviewDialog(BuildContext context, dynamic booking, dynamic user) {
     double _rating = 3.0;
@@ -240,7 +281,8 @@ class _BookingListPageState extends State<BookingListPage>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Đánh giá của bạn cho "${booking.hotelName}"', style: Theme.of(context).textTheme.titleLarge),
+              Text('Đánh giá của bạn cho "${booking.hotelName}"',
+                  style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 16),
               RatingBar.builder(
                 initialRating: _rating,
@@ -249,7 +291,8 @@ class _BookingListPageState extends State<BookingListPage>
                 allowHalfRating: true,
                 itemCount: 5,
                 itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
-                itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
+                itemBuilder: (context, _) =>
+                    const Icon(Icons.star, color: Colors.amber),
                 onRatingUpdate: (rating) {
                   _rating = rating;
                 },
@@ -257,7 +300,8 @@ class _BookingListPageState extends State<BookingListPage>
               const SizedBox(height: 16),
               TextField(
                 controller: _commentController,
-                decoration: const InputDecoration(labelText: 'Viết bình luận...'),
+                decoration:
+                    const InputDecoration(labelText: 'Viết bình luận...'),
                 maxLines: 3,
               ),
               const SizedBox(height: 16),
@@ -280,9 +324,8 @@ class _BookingListPageState extends State<BookingListPage>
                       const SnackBar(content: Text('Cảm ơn bạn đã đánh giá!')),
                     );
                   } catch (e) {
-                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Lỗi: ${e.toString()}'))
-                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Lỗi: ${e.toString()}')));
                   }
                 },
               ),

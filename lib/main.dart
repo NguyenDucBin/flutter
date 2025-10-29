@@ -157,6 +157,7 @@ class AppEntry extends StatelessWidget {
         ChangeNotifierProvider<RoomProvider>(
           create: (context) => RoomProvider(
             context.read<RoomRepository>(),
+            context.read<HotelRepository>(),
           ),
         ),
         ChangeNotifierProvider<BookingProvider>(

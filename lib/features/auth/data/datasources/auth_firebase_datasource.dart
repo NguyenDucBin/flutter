@@ -58,4 +58,13 @@ class AuthFirebaseDataSource {
       return null;
     }
   }
+
+  Future<Map<String, dynamic>?> getUserData(String uid) async {
+    try {
+      final doc = await _firestore.collection('users').doc(uid).get();
+      return doc.data();
+    } catch (e) {
+      return null;
+    }
+  }
 }

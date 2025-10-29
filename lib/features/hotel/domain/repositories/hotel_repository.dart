@@ -15,4 +15,7 @@ abstract class HotelRepository {
 
   // Xóa một khách sạn
   Future<void> deleteHotel(String hotelId);
+  
+  // Cập nhật giá thấp nhất của khách sạn
+  Future<void> updateHotelMinPrice(String hotelId, double minPrice);
 }

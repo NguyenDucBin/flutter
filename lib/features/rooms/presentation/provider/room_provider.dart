@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
 import 'package:doanflutter/features/rooms/domain/repositories/room_repository.dart';
 import 'package:doanflutter/features/rooms/data/models/room_model.dart';
+import 'package:doanflutter/features/hotel/domain/repositories/hotel_repository.dart';
 
 class RoomProvider extends ChangeNotifier {
   final RoomRepository _roomRepository;
+  final HotelRepository _hotelRepository;
 
-  RoomProvider(this._roomRepository);
+  RoomProvider(this._roomRepository, this._hotelRepository);
 
   List<RoomEntity> _rooms = []; // Dùng cho Admin
   List<RoomEntity> get rooms => _rooms;
@@ -113,6 +115,7 @@ class RoomProvider extends ChangeNotifier {
       // Xóa phòng khỏi cả hai danh sách UI ngay lập tức
       _rooms.removeWhere((room) => room.roomId == roomId);
       _availableRooms.removeWhere((room) => room.roomId == roomId);
+      await _recalculateAndUdpateMinPrice(hotelId);
       notifyListeners();
     } catch (e) {
       _error = e.toString();
@@ -129,6 +132,7 @@ class RoomProvider extends ChangeNotifier {
       await _roomRepository.createRoom(room);
       // Sau khi tạo, fetch lại danh sách admin để có ID mới
       await fetchAllRooms(room.hotelId);
+      await _recalculateAndUdpateMinPrice(room.hotelId);
     } catch (e) {
       _error = e.toString();
       throw Exception(e);
@@ -154,6 +158,7 @@ class RoomProvider extends ChangeNotifier {
       if (availableIndex != -1) {
         _availableRooms[availableIndex] = room;
       }
+      await _recalculateAndUdpateMinPrice(room.hotelId);
     } catch (e) {
       _error = e.toString();
       throw Exception(e);
@@ -162,4 +167,33 @@ class RoomProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> _recalculateAndUdpateMinPrice(String hotelId) async {
+  try {
+    // 1. Lấy danh sách phòng mới nhất từ repository
+    final allRooms = await _roomRepository.fetchRooms(hotelId);
+
+    double newMinPrice = 0.0; // Giá mặc định nếu không có phòng
+
+    if (allRooms.isNotEmpty) {
+      // 2. Lọc ra tất cả các giá hợp lệ (phải lớn hơn 0)
+      final prices = allRooms
+          .map((r) => r.pricePerNight)
+          .where((p) => p > 0);
+
+      if (prices.isNotEmpty) {
+        // 3. Tìm giá thấp nhất
+        newMinPrice = prices.reduce((min, current) => current < min ? current : min);
+      }
+      // Nếu 'prices' rỗng (không có phòng, hoặc giá 0), newMinPrice sẽ là 0.0
+    }
+
+    // 4. Cập nhật tài liệu khách sạn bằng repository
+    await _hotelRepository.updateHotelMinPrice(hotelId, newMinPrice);
+
+  } catch (e) {
+    debugPrint('Lỗi khi tính toán minPrice: $e');
+    // Không ném lỗi, để hàm gốc (create/update/delete) tiếp tục
+  }
+}
 }

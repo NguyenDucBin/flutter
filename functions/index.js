@@ -83,3 +83,51 @@ exports.onBookingUpdated = functions.firestore
 
     return null; // Không làm gì nếu status không đổi
   });
+
+// 3. Tự động cập nhật minPrice của khách sạn khi phòng thay đổi
+exports.updateHotelMinPrice = functions.firestore
+  .document("hotels/{hotelId}/rooms/{roomId}")
+  .onWrite(async (change, context) => {
+    // Lấy hotelId từ tham số (ví dụ: "hotels/ABC/rooms/123" -> hotelId = "ABC")
+    const hotelId = context.params.hotelId;
+    const hotelRef = db.collection("hotels").doc(hotelId);
+
+    // Lấy tài liệu khách sạn hiện tại để đọc minPrice cũ
+    const hotelDoc = await hotelRef.get();
+    if (!hotelDoc.exists) {
+      console.log("Khách sạn không tồn tại:", hotelId);
+      return null;
+    }
+    const currentMinPrice = hotelDoc.data().minPrice;
+
+    // Lấy tất cả các phòng của khách sạn này
+    const roomsSnapshot = await hotelRef.collection("rooms").get();
+
+    let newMinPrice = 0.0; // Giá tối thiểu mới, mặc định là 0
+
+    if (!roomsSnapshot.empty) {
+      // Lọc ra tất cả các mức giá hợp lệ (là số và > 0)
+      const prices = roomsSnapshot.docs
+        .map((doc) => doc.data().pricePerNight)
+        .filter((price) => typeof price === "number" && price > 0);
+      
+      if (prices.length > 0) {
+        // Tìm giá thấp nhất trong các giá hợp lệ
+        newMinPrice = Math.min(...prices);
+      }
+    }
+    
+    // Chỉ cập nhật Firestore nếu giá mới khác giá cũ
+    // Điều này giúp tiết kiệm chi phí (lượt ghi)
+    if (currentMinPrice !== newMinPrice) {
+      console.log(
+        `Cập nhật minPrice cho hotel ${hotelId}: ${currentMinPrice} -> ${newMinPrice}`
+      );
+      // Thực hiện cập nhật
+      return hotelRef.update({ minPrice: newMinPrice });
+    }
+    
+    // Không cần cập nhật
+    console.log(`minPrice cho hotel ${hotelId} đã là ${newMinPrice}. Không cập nhật.`);
+    return null;
+  });

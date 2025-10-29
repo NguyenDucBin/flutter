@@ -58,9 +58,6 @@ class HotelModel extends HotelEntity {
       'imageUrls': imageUrls,
       'amenities': amenities,
       'updatedAt': FieldValue.serverTimestamp(),
-      'minPrice': minPrice,
-      'avgRating': avgRating,
-      'reviewCount': reviewCount,
     };
   }
 }

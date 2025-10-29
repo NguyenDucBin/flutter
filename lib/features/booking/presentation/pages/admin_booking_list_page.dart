@@ -69,9 +69,8 @@ class _AdminBookingListPageState extends State<AdminBookingListPage> {
         final booking = bookings[index];
         return Column(
           children: [
-            BookingCard(booking: booking),
-            if (booking.status == 'pending')
-              _buildAdminActions(context, booking)
+            BookingCard(booking: booking),           
+            _buildAdminActions(context, booking)
           ],
         );
       },
