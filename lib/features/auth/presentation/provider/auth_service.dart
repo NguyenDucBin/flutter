@@ -1,12 +1,17 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:doanflutter/features/auth/domain/entities/user_entity.dart';
 import 'package:doanflutter/features/auth/domain/repositories/auth_repository.dart';
+import 'package:doanflutter/features/favorites/presentation/provider/favorites_provider.dart';
+import 'package:doanflutter/core/services/messaging_service.dart'; 
+import 'package:provider/provider.dart';
 
 // AuthService bây giờ là Provider quản lý trạng thái,
 // nó sử dụng AuthRepository để thực hiện hành động.
 class AuthService extends ChangeNotifier {
   final AuthRepository _authRepository;
+  final MessagingService _messagingService;
   StreamSubscription<UserEntity?>? _userSubscription;
 
   UserEntity? _user;
@@ -19,13 +24,22 @@ class AuthService extends ChangeNotifier {
   String? get error => _error;
 
   // Constructor: Lắng nghe stream từ Repository
-  AuthService(this._authRepository) {
+  AuthService(this._authRepository, this._messagingService) { 
     _userSubscription = _authRepository.user.listen(
       (user) {
         _user = user;
         _isLoading = false;
         _error = null;
         notifyListeners();
+
+        if (user != null) {
+          // Khi user đăng nhập, lấy FcmToken
+          try {
+            _messagingService.initAndSaveToken();
+          } catch (e) {
+            debugPrint("Lỗi khi gọi initAndSaveToken: $e");
+          }
+        }
       },
       onError: (e) {
         _user = null;

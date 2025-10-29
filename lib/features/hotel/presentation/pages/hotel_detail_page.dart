@@ -11,6 +11,8 @@ import 'package:doanflutter/features/reviews/presentation/provider/review_provid
 
 // --- THÊM IMPORT CHO ROOMCARD MỚI ---
 import 'package:doanflutter/features/rooms/presentation/widgets/room_card_widget.dart';
+import 'package:doanflutter/features/favorites/presentation/provider/favorites_provider.dart';
+import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
 
 class HotelDetailPage extends StatefulWidget {
   final HotelEntity hotel;
@@ -21,19 +23,15 @@ class HotelDetailPage extends StatefulWidget {
 }
 
 class _HotelDetailPageState extends State<HotelDetailPage> {
-  // --- THÊM STATE NGÀY THÁNG ---
   late DateTime _checkIn;
   late DateTime _checkOut;
-  // -------------------------
 
   @override
   void initState() {
     super.initState();
-    // --- KHỞI TẠO NGÀY ---
     final now = DateTime.now();
     _checkIn = DateTime(now.year, now.month, now.day); // Bắt đầu từ 0h hôm nay
     _checkOut = _checkIn.add(const Duration(days: 1)); // Mặc định 1 đêm
-    // -------------------
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       // Tải phòng và review cho khách sạn này
@@ -57,7 +55,6 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
     'Spa': Icons.spa,
   };
 
-  // --- HÀM HELPER ĐỂ CHỌN NGÀY ---
   Future<void> _selectDate(BuildContext context, bool isCheckIn) async {
     final now = DateTime.now();
     // Ngày đầu tiên có thể chọn: hôm nay cho check-in, ngày sau check-in cho check-out
@@ -98,12 +95,28 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
     final reviewProvider = context.watch<ReviewProvider>();
     final dateFormat = DateFormat('EEE, dd MMM', 'vi_VN'); // Định dạng Thứ, Ngày Tháng (Tiếng Việt)
     final theme = Theme.of(context); // Lấy theme
+    final favoritesProvider = context.watch<FavoritesProvider>();
+    final authService = context.watch<AuthService>();
+    final user = authService.user;
+    final bool isFavorite = favoritesProvider.isFavorite(widget.hotel.id);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.hotel.name),
         backgroundColor: Colors.indigo, // Màu nhất quán
         foregroundColor: Colors.white, // Màu chữ
+        actions: [
+          if (user != null) // Chỉ hiện nếu đã đăng nhập
+            IconButton(
+              icon: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: isFavorite ? Colors.redAccent : Colors.white,
+              ),
+              onPressed: () {
+                favoritesProvider.toggleFavorite(user.uid, widget.hotel.id);
+              },
+            ),
+        ],
       ),
       body: ListView( // Dùng ListView thay vì SingleChildScrollView
         children: [

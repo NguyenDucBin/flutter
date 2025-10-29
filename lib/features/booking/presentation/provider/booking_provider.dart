@@ -11,6 +11,26 @@ class BookingProvider extends ChangeNotifier {
   // Trạng thái cho danh sách booking
   List<BookingEntity> _myBookings = [];
   List<BookingEntity> get myBookings => _myBookings;
+  List<BookingEntity> get upcomingBookings {
+    final now = DateTime.now();
+    return _myBookings.where((b) {
+      return (b.status == 'pending' || b.status == 'confirmed') &&
+             b.checkIn.isAfter(now);
+    }).toList();
+  }
+
+  List<BookingEntity> get completedBookings {
+    final now = DateTime.now();
+    return _myBookings.where((b) {
+      // Đã check-out HOẶC ngày check-out đã qua
+      return b.status == 'checked_out' ||
+             (b.status == 'confirmed' && b.checkOut.isBefore(now));
+    }).toList();
+  }
+
+  List<BookingEntity> get cancelledBookings {
+    return _myBookings.where((b) => b.status == 'canceled').toList();
+  }
   bool _isLoadingList = false;
   bool get isLoadingList => _isLoadingList;
 

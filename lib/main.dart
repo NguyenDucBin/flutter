@@ -47,11 +47,25 @@ import 'features/reviews/domain/repositories/review_repository.dart';
 import 'features/reviews/data/repositories/review_repository_impl.dart';
 import 'features/reviews/presentation/provider/review_provider.dart';
 
+import 'package:firebase_messaging/firebase_messaging.dart'; 
+import 'package:doanflutter/core/services/messaging_service.dart';
+
+import 'features/favorites/domain/repositories/favorites_repository.dart';
+import 'features/favorites/data/repositories/favorites_repository_impl.dart';
+import 'features/favorites/presentation/provider/favorites_provider.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   runApp(const AppEntry());
 }
 
@@ -69,6 +83,13 @@ class AppEntry extends StatelessWidget {
         Provider<FirebaseAuth>(create: (_) => FirebaseAuth.instance),
         Provider<FirebaseFirestore>(create: (_) => FirebaseFirestore.instance),
         Provider<StorageService>(create: (_) => StorageService()),
+        Provider<MessagingService>(create: (_) => MessagingService()),
+
+        Provider<FavoritesRepository>(
+          create: (context) => FavoritesRepositoryImpl(
+            context.read<FirebaseFirestore>(),
+          ),
+        ),
 
         // === 2. DATASOURCES ===
         // (Chỉ Auth feature dùng DataSource riêng, các feature khác
@@ -125,6 +146,7 @@ class AppEntry extends StatelessWidget {
         ChangeNotifierProvider<AuthService>(
           create: (context) => AuthService(
             context.read<AuthRepository>(),
+            context.read<MessagingService>(),
           ),
         ),
         ChangeNotifierProvider<HotelProvider>(
@@ -155,6 +177,11 @@ class AppEntry extends StatelessWidget {
         ChangeNotifierProvider<ReviewProvider>(
           create: (context) => ReviewProvider(
             context.read<ReviewRepository>(),
+          ),
+        ),
+        ChangeNotifierProvider<FavoritesProvider>(
+          create: (context) => FavoritesProvider(
+            context.read<FavoritesRepository>(),
           ),
         ),
       ],

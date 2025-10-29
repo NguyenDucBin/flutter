@@ -1,12 +1,14 @@
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
+import 'package:doanflutter/features/booking/domain/entities/booking_entity.dart'; 
 import 'package:doanflutter/features/booking/presentation/provider/booking_provider.dart';
 import 'package:doanflutter/features/reviews/domain/entities/review_entity.dart';
 import 'package:doanflutter/features/reviews/presentation/provider/review_provider.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../widgets/booking_card_widget.dart';
+import 'package:doanflutter/features/hotel/presentation/provider/hotel_provider.dart';
 
 class BookingListPage extends StatefulWidget {
   const BookingListPage({super.key});
@@ -15,26 +17,41 @@ class BookingListPage extends StatefulWidget {
   State<BookingListPage> createState() => _BookingListPageState();
 }
 
-class _BookingListPageState extends State<BookingListPage> {
+// Thêm 'with SingleTickerProviderStateMixin'
+class _BookingListPageState extends State<BookingListPage>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController; // Thêm controller cho TabBar
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this); // Khởi tạo TabController với 3 tab
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final user = context.read<AuthService>().user;
       if (user != null) {
+        // Vẫn gọi fetchMyBookings như cũ để lấy dữ liệu ban đầu
         context.read<BookingProvider>().fetchMyBookings(user.uid);
       }
     });
   }
 
+  // Thêm hàm dispose để hủy TabController
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  // Sửa lại hàm build để dùng DefaultTabController
   @override
   Widget build(BuildContext context) {
-    final user = context.watch<AuthService>().user;
     final bookingProvider = context.watch<BookingProvider>();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Phòng Đã Đặt', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Chuyến đi của tôi',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
         elevation: 1,
@@ -47,51 +64,104 @@ class _BookingListPageState extends State<BookingListPage> {
             },
           ),
         ],
+        // Thêm TabBar vào bottom của AppBar
+        bottom: TabBar(
+          controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white.withOpacity(0.7),
+          indicatorColor: Colors.white,
+          tabs: const [
+            Tab(text: 'Sắp tới'),
+            Tab(text: 'Đã qua'),
+            Tab(text: 'Đã hủy'),
+          ],
+        ),
       ),
       backgroundColor: const Color(0xFFF4F6F9),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
-        onPressed: () {
-          // Điều hướng đến trang danh sách khách sạn (ví dụ: route '/home')
-          Navigator.pushNamed(context, '/home');
-        },
-        icon: const Icon(Icons.search), // Đổi icon thành tìm kiếm
-        label: const Text('Tìm & Đặt Phòng'), // Đổi chữ cho rõ nghĩa
-      ),
-      body: _buildBody(context, user, bookingProvider),
+      // Bỏ FloatingActionButton ở đây (nó đã có ở UserHomePage)
+
+      // Sửa body để hiển thị TabBarView
+      body: _buildBody(context, bookingProvider),
     );
   }
 
-  Widget _buildBody(BuildContext context, dynamic user, BookingProvider provider) {
+  // Sửa _buildBody để dùng TabBarView
+  Widget _buildBody(BuildContext context, BookingProvider provider) {
+    final user = context.watch<AuthService>().user; // Lấy user
+
     if (user == null) {
       return const Center(child: Text('Vui lòng đăng nhập.'));
     }
+    // Sử dụng isLoadingList (trạng thái chung khi fetch)
     if (provider.isLoadingList) {
       return const Center(child: CircularProgressIndicator());
     }
     if (provider.error != null) {
       return Center(child: Text('Lỗi: ${provider.error}'));
     }
-    if (provider.myBookings.isEmpty) {
-      return _buildEmptyState();
+
+    // Thêm TabBarView để hiển thị nội dung từng tab
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        // Tab "Sắp tới" - dùng getter upcomingBookings
+        _buildBookingTab(
+          context,
+          provider.upcomingBookings,
+          user,
+          'Chưa có chuyến đi nào sắp tới.',
+        ),
+        // Tab "Đã qua" - dùng getter completedBookings
+        _buildBookingTab(
+          context,
+          provider.completedBookings,
+          user,
+          'Bạn chưa hoàn thành chuyến đi nào.',
+        ),
+        // Tab "Đã hủy" - dùng getter cancelledBookings
+        _buildBookingTab(
+          context,
+          provider.cancelledBookings,
+          user,
+          'Không có chuyến đi nào bị hủy.',
+        ),
+      ],
+    );
+  }
+
+  // Tách ra hàm mới: _buildBookingTab để tái sử dụng code cho mỗi tab
+  Widget _buildBookingTab(BuildContext context, List<BookingEntity> bookings,
+      dynamic user, String emptyMessage) {
+    if (bookings.isEmpty) {
+      // Dùng hàm empty state với message tùy chỉnh
+      return _buildEmptyState(emptyMessage);
     }
 
     return RefreshIndicator(
       onRefresh: () async {
-        final user = context.read<AuthService>().user;
+        // Gọi lại fetchMyBookings khi kéo refresh
         if (user != null) {
           await context.read<BookingProvider>().fetchMyBookings(user.uid);
         }
       },
       child: ListView.separated(
         padding: const EdgeInsets.all(16.0),
-        itemCount: provider.myBookings.length,
+        itemCount: bookings.length,
         itemBuilder: (context, index) {
-          final booking = provider.myBookings[index];
-          return Column( 
+          final booking = bookings[index];
+          return Column(
             children: [
-              BookingCard(booking: booking),
+              // Thêm GestureDetector để cho phép nhấn vào xem chi tiết (TODO)
+              GestureDetector(
+                  onTap: () {
+                    // TODO: Điều hướng đến trang chi tiết booking
+                    // Navigator.pushNamed(context, '/booking_detail', arguments: booking.bookingId);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text('Xem chi tiết cho: ${booking.hotelName}')));
+                  },
+                  child: BookingCard(booking: booking)),
+              // Nút review chỉ hiển thị ở tab "Đã qua" VÀ khi status là 'checked_out'
+              // (Điều kiện này đã đúng trong hàm initState của bạn)
               if (booking.status == 'checked_out')
                 _buildReviewButton(context, booking, user),
             ],
@@ -102,16 +172,21 @@ class _BookingListPageState extends State<BookingListPage> {
     );
   }
 
-  Widget _buildEmptyState() {
+  // Sửa lại _buildEmptyState để nhận message
+  Widget _buildEmptyState(String message) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.luggage_outlined, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
-          const Text(
-            'Chưa có đặt phòng nào',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.black54),
+          Text(
+            message, // Dùng message truyền vào
+            style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.black54),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Text(
@@ -123,9 +198,11 @@ class _BookingListPageState extends State<BookingListPage> {
       ),
     );
   }
+
+  // (Hàm _buildReviewButton và _showReviewDialog giữ nguyên từ file bạn cung cấp)
   //review button
   Widget _buildReviewButton(BuildContext context, dynamic booking, dynamic user) {
-    return Container( 
+     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.grey[100],
@@ -138,7 +215,6 @@ class _BookingListPageState extends State<BookingListPage> {
         icon: const Icon(Icons.star, color: Colors.amber),
         label: const Text('Viết đánh giá', style: TextStyle(color: Colors.black87)),
         onPressed: () {
-          // Mở Dialog để đánh giá
           _showReviewDialog(context, booking, user);
         },
       ),
@@ -146,13 +222,13 @@ class _BookingListPageState extends State<BookingListPage> {
   }
   //review dialog
   void _showReviewDialog(BuildContext context, dynamic booking, dynamic user) {
-    double _rating = 3.0; // Điểm sao mặc định
+    double _rating = 3.0;
     final _commentController = TextEditingController();
     final reviewProvider = context.read<ReviewProvider>();
 
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Cho phép keyboard đẩy bottom sheet lên
+      isScrollControlled: true,
       builder: (ctx) {
         return Padding(
           padding: EdgeInsets.only(
@@ -175,7 +251,7 @@ class _BookingListPageState extends State<BookingListPage> {
                 itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
                 itemBuilder: (context, _) => const Icon(Icons.star, color: Colors.amber),
                 onRatingUpdate: (rating) {
-                  _rating = rating; // Cập nhật điểm sao
+                  _rating = rating;
                 },
               ),
               const SizedBox(height: 16),
@@ -191,14 +267,15 @@ class _BookingListPageState extends State<BookingListPage> {
                   final review = ReviewEntity(
                     hotelId: booking.hotelId,
                     userId: user.uid,
-                    userName: user.name ?? 'Ẩn danh',
+                    userName: user.name ?? 'Ẩn danh', // Lấy tên user từ Auth
                     rating: _rating,
                     comment: _commentController.text,
                     createdAt: DateTime.now(),
                   );
                   try {
                     await reviewProvider.submitReview(review);
-                    Navigator.pop(ctx); // Đóng bottom sheet
+                    Navigator.pop(ctx);
+                    context.read<HotelProvider>().fetchAllHotels();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Cảm ơn bạn đã đánh giá!')),
                     );
@@ -216,15 +293,4 @@ class _BookingListPageState extends State<BookingListPage> {
       },
     );
   }
-
-  String _fmtDate(DateTime d) => DateFormat('dd/MM/yyyy').format(d);
-
-  Color _statusColor(String status) {
-     switch (status) {
-       case 'pending': return Colors.orange.shade600;
-       case 'confirmed': return Colors.green.shade600;
-       case 'canceled': return Colors.red.shade600;
-       default: return Colors.grey.shade600;
-     }
-   }
 }
