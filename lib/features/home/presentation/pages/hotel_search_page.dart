@@ -6,7 +6,6 @@ import 'package:doanflutter/features/hotel/presentation/pages/hotel_detail_page.
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
 import 'package:intl/intl.dart';
 
-
 class HotelSearchPage extends StatefulWidget {
   const HotelSearchPage({super.key});
 
@@ -15,20 +14,24 @@ class HotelSearchPage extends StatefulWidget {
 }
 
 class _HotelSearchPageState extends State<HotelSearchPage> {
-  // Danh sách tiện ích (để render UI)
-  final List<String> _allAmenities = ['Wifi', 'Hồ bơi', 'Bãi đỗ xe', 'Nhà hàng', 'Gym', 'Spa'];
-
+  final List<String> _allAmenities = [
+    'Wifi',
+    'Hồ bơi',
+    'Bãi đỗ xe',
+    'Nhà hàng',
+    'Gym',
+    'Spa'
+  ];
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Tải danh sách hotels cho user
       context.read<HotelProvider>().fetchAllHotels();
     });
   }
 
-  Widget _buildFilterSidebar(BuildContext context) { // Thêm BuildContext context
+  Widget _buildFilterSidebar(BuildContext context) {
     final provider = context.watch<HotelProvider>();
     final priceRange = provider.priceRange;
     final selectedAmenities = provider.selectedAmenities;
@@ -41,42 +44,50 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Filters', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Filters',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             const Text('Price range'),
             RangeSlider(
-              values: priceRange, // Dùng giá trị từ provider
+              values: priceRange,
               min: 0,
-              max: 10000000, // 10 triệu
-              divisions: 10, // Chia thành 10 khoảng (0, 1M, 2M, ..., 10M)
-              // Hiển thị nhãn giá trị (định dạng tiền tệ)
+              max: 10000000,
+              divisions: 10,
               labels: RangeLabels(
-                 NumberFormat.compactSimpleCurrency(locale: 'vi_VN', decimalDigits: 0).format(priceRange.start),
-                 NumberFormat.compactSimpleCurrency(locale: 'vi_VN', decimalDigits: 0).format(priceRange.end >= 10000000 ? 10000000 : priceRange.end), // Giới hạn max label
+                NumberFormat.compactSimpleCurrency(
+                        locale: 'vi_VN', decimalDigits: 0)
+                    .format(priceRange.start),
+                NumberFormat.compactSimpleCurrency(
+                        locale: 'vi_VN', decimalDigits: 0)
+                    .format(priceRange.end >= 10000000
+                        ? 10000000
+                        : priceRange.end),
               ),
               onChanged: (values) {
                 context.read<HotelProvider>().setPriceRange(values);
               },
             ),
             const SizedBox(height: 8),
-            const Text('Tiện ích'), // Đổi tên cho đúng
+            const Text('Tiện ích'),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: _allAmenities // Dùng list tiện ích
-                  .map((t) => FilterChip(
-                        label: Text(t),
-                        selected: selectedAmenities.contains(t), // Dùng provider
-                        onSelected: (sel) {
-                          context.read<HotelProvider>().toggleAmenity(t);
-                        },
-                      ))
+              children: _allAmenities
+                  .map(
+                    (t) => FilterChip(
+                      label: Text(t),
+                      selected: selectedAmenities.contains(t),
+                      onSelected: (sel) {
+                        context.read<HotelProvider>().toggleAmenity(t);
+                      },
+                    ),
+                  )
                   .toList(),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).maybePop(), // Đóng drawer
-              child: const Text('Áp dụng'), // Đổi chữ
+              onPressed: () => Navigator.of(context).maybePop(),
+              child: const Text('Áp dụng'),
             ),
           ],
         ),
@@ -100,12 +111,14 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: image != null
-                  ? Image.network(image, width: 140, height: 95, fit: BoxFit.cover)
+                  ? Image.network(image,
+                      width: 140, height: 95, fit: BoxFit.cover)
                   : Container(
                       width: 140,
                       height: 95,
                       color: Colors.grey[200],
-                      child: const Icon(Icons.photo, size: 40, color: Colors.grey),
+                      child: const Icon(Icons.photo,
+                          size: 40, color: Colors.grey),
                     ),
             ),
             const SizedBox(width: 12),
@@ -113,7 +126,9 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(hotel.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  Text(hotel.name,
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 6),
                   Text(hotel.address, style: TextStyle(color: Colors.grey[700])),
                   const SizedBox(height: 8),
@@ -122,11 +137,15 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
                     children: [
                       Row(children: [
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(6)),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(6)),
                           child: Row(
                             children: [
-                              const Icon(Icons.star, color: Colors.blue, size: 14),
+                              const Icon(Icons.star,
+                                  color: Colors.blue, size: 14),
                               const SizedBox(width: 4),
                               Text(hotel.avgRating.toStringAsFixed(1),
                                   style: const TextStyle(color: Colors.blue)),
@@ -141,7 +160,7 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Text(
-                            currencyFormat.format(hotel.minPrice), // Dùng định dạng tiền tệ
+                            currencyFormat.format(hotel.minPrice),
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold),
                           ),
@@ -151,21 +170,21 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
                           const SizedBox(height: 6),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.indigo,
-                              foregroundColor: Colors.white, // Màu chữ
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Padding nhỏ hơn
-                              textStyle: const TextStyle(fontSize: 13) // Chữ nhỏ hơn
-                            ),
+                                backgroundColor: Colors.indigo,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 8),
+                                textStyle: const TextStyle(fontSize: 13)),
                             onPressed: () {
-                              // Sử dụng MaterialPageRoute trực tiếp thay vì pushNamed
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => HotelDetailPage(hotel: hotel),
+                                  builder: (context) =>
+                                      HotelDetailPage(hotel: hotel),
                                 ),
                               );
                             },
-                            child: const Text('Xem phòng'), // Đổi chữ
+                            child: const Text('Xem phòng'),
                           ),
                         ],
                       ),
@@ -181,43 +200,48 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
   }
 
   Widget _buildResultsList(List<HotelEntity> hotels) {
-    if (hotels.isEmpty) { // Dùng thẳng list hotels (đã được lọc từ provider)
-      return const Center(child: Padding(
+    if (hotels.isEmpty) {
+      return const Center(
+          child: Padding(
         padding: EdgeInsets.all(24.0),
-        child: Text('Không tìm thấy khách sạn phù hợp với bộ lọc.', style: TextStyle(color: Colors.grey)),
+        child: Text('Không tìm thấy khách sạn phù hợp với bộ lọc.',
+            style: TextStyle(color: Colors.grey)),
       ));
     }
 
     return ListView.builder(
       padding: const EdgeInsets.only(top: 8, bottom: 32),
-      itemCount: hotels.length, // Dùng hotels.length
-      itemBuilder: (context, index) => _buildHotelCardFromEntity(hotels[index]), // Dùng hotels[index]
+      itemCount: hotels.length,
+      itemBuilder: (context, index) =>
+          _buildHotelCardFromEntity(hotels[index]),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<HotelProvider>();
-    // --- DANH SÁCH HIỂN THỊ LÀ provider.filteredHotels ---
     final hotels = provider.filteredHotels;
 
     return Scaffold(
-      drawer: Drawer(child: _buildFilterSidebar(context)), // Truyền context
+      drawer: Drawer(child: _buildFilterSidebar(context)),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
         title: Row(
           children: [
+            // Ô tìm kiếm
             Expanded(
               child: TextField(
-                // controller: _searchController, // Không cần controller nữa
                 decoration: InputDecoration(
                   hintText: 'Tìm khách sạn, địa điểm...',
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
                   fillColor: Colors.grey[100],
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none),
                 ),
                 onChanged: (q) {
                   context.read<HotelProvider>().setSearchQuery(q);
@@ -225,22 +249,76 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
               ),
             ),
             const SizedBox(width: 12),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.indigo),
-              onPressed: () {
-                 // TODO: Thêm chức năng chọn ngày ở đây
-                 ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Chức năng chọn ngày chưa được thêm.'))
-                 );
+
+            // 🔹 Nút chọn ngày có hiển thị ngày đã chọn
+            Builder(
+              builder: (ctx) {
+                final provider = context.watch<HotelProvider>();
+                final dateFormat = DateFormat('dd/MM');
+                String labelText;
+
+                if (provider.startDate != null && provider.endDate != null) {
+                  labelText =
+                      '${dateFormat.format(provider.startDate!)} - ${dateFormat.format(provider.endDate!)}';
+                } else {
+                  labelText = 'Chọn ngày';
+                }
+
+                return ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.indigo,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
+                    textStyle: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w600),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                  ),
+                  onPressed: () async {
+                    final today = DateTime.now();
+                    final range = await showDateRangePicker(
+                      context: context,
+                      firstDate: today,
+                      lastDate: DateTime(today.year + 2),
+                      helpText: 'Chọn ngày nhận và trả phòng',
+                      cancelText: 'Hủy',
+                      confirmText: 'Xong',
+                      locale: const Locale('vi', 'VN'),
+                      builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: ColorScheme.light(
+                              primary: Colors.indigo,
+                              onPrimary: Colors.white,
+                              onSurface: Colors.black,
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
+                    );
+
+                    if (range != null) {
+                      context
+                          .read<HotelProvider>()
+                          .setDateRange(range.start, range.end);
+                    }
+                  },
+                  icon: const Icon(Icons.calendar_today),
+                  label: Text(labelText),
+                );
               },
-              icon: const Icon(Icons.calendar_today),
-              label: const Text('Dates'),
             ),
+
             const SizedBox(width: 8),
+
+            // Nút mở bộ lọc
             Builder(
               builder: (ctx) => IconButton(
                 onPressed: () => Scaffold.of(ctx).openDrawer(),
-                icon: const Icon(Icons.filter_list, color: Colors.black54),
+                icon:
+                    const Icon(Icons.filter_list, color: Colors.black54, size: 28),
               ),
             ),
           ],
@@ -264,7 +342,7 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildFilterSidebar(context), // Truyền context
+              _buildFilterSidebar(context),
               const VerticalDivider(width: 1),
               Expanded(child: _buildResultsList(hotels)),
             ],
@@ -278,11 +356,6 @@ class _HotelSearchPageState extends State<HotelSearchPage> {
 
   @override
   void dispose() {
-    // _searchController.dispose(); // Không cần nữa
     super.dispose();
   }
 }
-
-// Hàm generateRoute và _errorRoute không cần thiết ở đây nếu đã có trong AppRouter
-// Route<dynamic> generateRoute(RouteSettings settings) { ... }
-// MaterialPageRoute _errorRoute(String message) { ... }
