@@ -24,16 +24,18 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
 
   @override
   Future<void> toggleFavorite(String userId, String hotelId, bool isCurrentlyFavorite) async {
+    FieldValue updateValue;
     if (isCurrentlyFavorite) {
       // Bỏ yêu thích
-      await _userDoc(userId).update({
-        'favorites': FieldValue.arrayRemove([hotelId])
-      });
+      updateValue = FieldValue.arrayRemove([hotelId]);
     } else {
       // Thêm yêu thích
-      await _userDoc(userId).update({
-        'favorites': FieldValue.arrayUnion([hotelId])
-      });
+      updateValue = FieldValue.arrayUnion([hotelId]);
     }
+
+    await _userDoc(userId).set(
+      {'favorites': updateValue},
+      SetOptions(merge: true), 
+    );
   }
 }
