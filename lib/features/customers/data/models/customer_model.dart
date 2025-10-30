@@ -19,4 +19,24 @@ class CustomerModel extends CustomerEntity {
       phone: data['phone'] ?? '', // Giả sử bạn lưu phone trong 'users'
     );
   }
+
+  // --- HÀM NÀY BỊ THIẾU (Gây ra lỗi TypeError) ---
+  // Chuyển từ Entity (lớp cha) sang Model (lớp con)
+  factory CustomerModel.fromEntity(CustomerEntity entity) {
+    return CustomerModel(
+      id: entity.id,
+      name: entity.name,
+      email: entity.email,
+      phone: entity.phone,
+    );
+  }
+
+  // --- HÀM NÀY BỊ THIẾU (Cần thiết cho việc update) ---
+  // Chuyển Model thành Map để update lên Firestore
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'phone': phone,
+    };
+  }
 }

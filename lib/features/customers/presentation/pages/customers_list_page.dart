@@ -1,3 +1,4 @@
+// lib/features/customers/presentation/pages/customers_list_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart'; // Import AuthService
@@ -16,6 +17,7 @@ class _CustomersListPageState extends State<CustomersListPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Dùng listen: false trong initState nếu bạn chỉ gọi 1 lần
       context.read<CustomerProvider>().fetchCustomers();
     });
   }
@@ -29,7 +31,8 @@ class _CustomersListPageState extends State<CustomersListPage> {
       // Màu nền sáng hơn
       backgroundColor: const Color(0xFFF4F6F9),
       appBar: AppBar(
-        title: const Text('Quản Lý Khách Hàng', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Quản Lý Khách Hàng',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         // Màu Indigo nhất quán
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
@@ -57,14 +60,17 @@ class _CustomersListPageState extends State<CustomersListPage> {
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 filled: true,
                 fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.0), // Bo tròn hơn
                   borderSide: BorderSide.none,
                 ),
-                focusedBorder: OutlineInputBorder( // Viền khi focus
+                focusedBorder: OutlineInputBorder(
+                  // Viền khi focus
                   borderRadius: BorderRadius.circular(30.0),
-                  borderSide: const BorderSide(color: Colors.indigo, width: 1.5),
+                  borderSide:
+                      const BorderSide(color: Colors.indigo, width: 1.5),
                 ),
               ),
               onChanged: (value) => provider.setSearchQuery(value),
@@ -94,18 +100,17 @@ class _CustomersListPageState extends State<CustomersListPage> {
     }
     if (filteredCustomers.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-             Icon(Icons.people_outline, size: 60, color: Colors.grey[400]),
-             const SizedBox(height: 16),
-             Text(
-              'Không tìm thấy khách hàng.',
-              style: TextStyle(color: Colors.grey[600], fontSize: 16),
-            ),
-          ],
-        )
-      );
+          child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.people_outline, size: 60, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            'Không tìm thấy khách hàng.',
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          ),
+        ],
+      ));
     }
 
     // Danh sách khách hàng
@@ -119,7 +124,8 @@ class _CustomersListPageState extends State<CustomersListPage> {
           final customer = filteredCustomers[index];
           return Card(
             // Card đơn giản hơn
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             elevation: 1,
             margin: EdgeInsets.zero, // Margin đã có ở Separated
             child: ListTile(
@@ -127,36 +133,46 @@ class _CustomersListPageState extends State<CustomersListPage> {
                 backgroundColor: Colors.indigo.shade100,
                 foregroundColor: Colors.indigo.shade800,
                 child: Text(
-                  customer.name.isNotEmpty ? customer.name[0].toUpperCase() : '?',
+                  customer.name.isNotEmpty
+                      ? customer.name[0].toUpperCase()
+                      : '?',
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
-              title: Text(customer.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+              title: Text(customer.name,
+                  style: const TextStyle(fontWeight: FontWeight.w600)),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(customer.email, style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                  Text(customer.email,
+                      style: TextStyle(color: Colors.grey[700], fontSize: 13)),
                   if (customer.phone.isNotEmpty) // Chỉ hiện nếu có số phone
-                    Text('SĐT: ${customer.phone}', style: TextStyle(color: Colors.grey[700], fontSize: 13)),
+                    Text('SĐT: ${customer.phone}',
+                        style:
+                            TextStyle(color: Colors.grey[700], fontSize: 13)),
                 ],
               ),
               trailing: PopupMenuButton<String>(
                 icon: Icon(Icons.more_vert, color: Colors.grey[600]),
                 onSelected: (value) {
+                  // --- CẬP NHẬT LOGIC Ở ĐÂY ---
                   if (value == 'edit') {
-                    // TODO: Logic sửa
+                    _showEditDialog(context, customer);
                   } else if (value == 'delete') {
-                    // TODO: Gọi provider.deleteCustomer(customer.id)
+                    _handleDelete(context, customer);
                   }
                 },
                 itemBuilder: (context) => [
                   const PopupMenuItem(
                     value: 'edit',
-                    child: ListTile(leading: Icon(Icons.edit_outlined), title: Text('Sửa')),
+                    child: ListTile(
+                        leading: Icon(Icons.edit_outlined), title: Text('Sửa')),
                   ),
                   const PopupMenuItem(
                     value: 'delete',
-                    child: ListTile(leading: Icon(Icons.delete_outline, color: Colors.red), title: Text('Xóa')),
+                    child: ListTile(
+                        leading: Icon(Icons.delete_outline, color: Colors.red),
+                        title: Text('Xóa')),
                   ),
                 ],
               ),
@@ -165,6 +181,158 @@ class _CustomersListPageState extends State<CustomersListPage> {
         },
         separatorBuilder: (context, index) => const SizedBox(height: 10),
       ),
+    );
+  }
+
+  // --- HÀM MỚI: XỬ LÝ XÓA ---
+  void _handleDelete(BuildContext context, CustomerEntity customer) {
+    // Lấy provider (listen: false vì đang ở trong hàm)
+    final provider = context.read<CustomerProvider>();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Xác nhận xóa'),
+          content: Text(
+              'Bạn có chắc chắn muốn xóa khách hàng "${customer.name}" không?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Hủy'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // Đóng dialog
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Xóa'),
+              onPressed: () async {
+                Navigator.of(dialogContext).pop(); // Đóng dialog
+                try {
+                  // Gọi provider để xóa
+                  await provider.deleteCustomer(customer.id);
+                  // Hiển thị thông báo thành công (dùng context gốc)
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Đã xóa khách hàng thành công!'),
+                          backgroundColor: Colors.green),
+                    );
+                  }
+                } catch (e) {
+                  // Hiển thị thông báo lỗi (dùng context gốc)
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Text('Lỗi khi xóa: ${e.toString()}'),
+                          backgroundColor: Colors.red),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // --- HÀM MỚI: HIỂN THỊ DIALOG SỬA ---
+  void _showEditDialog(BuildContext context, CustomerEntity customer) {
+    final provider = context.read<CustomerProvider>();
+    final formKey = GlobalKey<FormState>();
+    final nameController = TextEditingController(text: customer.name);
+    final phoneController = TextEditingController(text: customer.phone);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        // Dùng StatefulBuilder để quản lý trạng thái loading bên trong dialog
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Sửa thông tin khách hàng'),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(labelText: 'Họ và tên'),
+                      validator: (v) =>
+                          v == null || v.trim().isEmpty ? 'Không được bỏ trống' : null,
+                    ),
+                    TextFormField(
+                      controller: phoneController,
+                      decoration: const InputDecoration(labelText: 'Số điện thoại'),
+                      keyboardType: TextInputType.phone,
+                      // (Bạn có thể thêm validator cho SĐT nếu muốn)
+                    ),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Hủy'),
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                ),
+                // Nút Lưu có trạng thái loading
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.indigo,
+                      foregroundColor: Colors.white),
+                  onPressed: provider.isUpdating
+                      ? null // Vô hiệu hóa nút khi đang cập nhật
+                      : () async {
+                          if (formKey.currentState!.validate()) {
+                            // Tạo entity mới với dữ liệu đã cập nhật
+                            final updatedCustomer = CustomerEntity(
+                              id: customer.id,
+                              email: customer.email, // Email giữ nguyên
+                              name: nameController.text.trim(),
+                              phone: phoneController.text.trim(),
+                            );
+
+                            // Cập nhật trạng thái loading của dialog
+                            setDialogState(() {});
+                            try {
+                              await provider.updateCustomer(updatedCustomer);
+                              Navigator.of(dialogContext).pop(); // Đóng dialog
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Cập nhật thành công!'),
+                                      backgroundColor: Colors.green),
+                                );
+                              }
+                            } catch (e) {
+                              // Cập nhật lại trạng thái dialog
+                              setDialogState(() {});
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text('Lỗi: ${e.toString()}'),
+                                      backgroundColor: Colors.red),
+                                );
+                              }
+                            }
+                          }
+                        },
+                  child: provider.isUpdating
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Lưu'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
