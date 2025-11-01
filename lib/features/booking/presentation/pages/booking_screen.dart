@@ -234,7 +234,7 @@ class _BookingScreenState extends State<BookingScreen> {
     Color? valueColor,
     double? valueSize,
   }) {
-    // ... (Giữ nguyên code của hàm này)
+    
      return Row(
       children: [
         Icon(icon, color: iconColor, size: 20),

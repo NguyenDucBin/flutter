@@ -211,7 +211,7 @@ class _ReportsPageSate extends State<ReportsPage> {
     );
   }
 
-  // (Copy hàm _buildStatCard từ file cũ của bạn vào đây)
+  
   Widget _buildStatCard({
     required String title,
     required String value,

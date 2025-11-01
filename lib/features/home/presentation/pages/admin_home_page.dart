@@ -16,7 +16,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
   // Danh sách các trang quản lý
   static const List<Widget> _widgetOptions = <Widget>[
-    ReportsPage(),           // Tab 0: Dashboard/Báo cáo
+    ReportsPage(),           // Tab 0: Báo cáo
     HotelManagementPage(),   // Tab 1: Quản lý Khách sạn
     AdminBookingListPage(),  // Tab 2: Quản lý Đặt phòng
     CustomersListPage(),     // Tab 3: Quản lý Khách hàng
@@ -39,7 +39,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),
-            label: 'Dashboard',
+            label: 'Báo cáo',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.business_outlined),

@@ -4,7 +4,7 @@ import 'package:doanflutter/features/hotel/domain/entities/hotel_entity.dart';
 import 'package:doanflutter/features/hotel/presentation/provider/hotel_provider.dart';
 import 'package:doanflutter/features/auth/presentation/provider/auth_service.dart';
 
-
+//
 class AddEditHotelPage extends StatefulWidget {
   final HotelEntity? hotel;
   
@@ -15,6 +15,7 @@ class AddEditHotelPage extends StatefulWidget {
 }
 
 class _AddEditHotelPageState extends State<AddEditHotelPage> {
+  // --- KHAI BÁO BIẾN VÀ CONTROLLER CHO FORM ---
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late final TextEditingController _addressController;
@@ -36,6 +37,7 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
     'Spa': Icons.spa,
   };
 
+// ---  KHỞI TẠO DỮ LIỆU BAN ĐẦU ---
   @override
   void initState() {
     super.initState();
@@ -52,6 +54,7 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
 
   @override
   void dispose() {
+     // Giải phóng bộ nhớ khi thoát trang
     _nameController.dispose();
     _addressController.dispose();
     _descriptionController.dispose();
@@ -74,7 +77,7 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
       );
     }
   }
-
+// ---LƯU DỮ LIỆU KHÁCH SẠN ---
   Future<void> _saveHotel() async {
     if (!_formKey.currentState!.validate()) return;
     if (_imageUrls.isEmpty) {
@@ -99,13 +102,13 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
         imageUrls: _imageUrls, // Lưu danh sách link
         amenities: _amenities,
       );
-
+// Gọi Provider để xử lý nghiệp vụ
       if (widget.hotel == null) {
         await context.read<HotelProvider>().createHotel(hotel);
       } else {
         await context.read<HotelProvider>().updateHotel(hotel);
       }
-
+// Quay lại trang trước (sau khi thêm/sửa thành công)
       if (mounted) Navigator.pop(context);
     } catch (e) {
       if (mounted) {
@@ -117,7 +120,7 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
+// --- XÂY DỰNG GIAO DIỆN ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,12 +132,14 @@ class _AddEditHotelPageState extends State<AddEditHotelPage> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            //Tên khách sạn
             TextFormField(
               controller: _nameController,
               decoration: const InputDecoration(labelText: 'Hotel Name'),
               validator: (v) => v?.isEmpty == true ? 'Required' : null,
             ),
             const SizedBox(height: 16),
+             //Địa chỉ
             TextFormField(
               controller: _addressController,
               decoration: const InputDecoration(labelText: 'Address'),

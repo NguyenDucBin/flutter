@@ -34,6 +34,7 @@ class _HotelManagementPageState extends State<HotelManagementPage> {
         title: const Text('My Hotels'),
         backgroundColor: Colors.purple,
       ),
+      
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // (Chuyển sang trang AddEditHotelPage)
@@ -87,6 +88,7 @@ class _HotelManagementPageState extends State<HotelManagementPage> {
               backgroundColor: Colors.purple.shade100,
               child: const Icon(Icons.business, color: Colors.purple),
             ),
+
             title: Text(hotel.name,
                 style: const TextStyle(fontWeight: FontWeight.w600)),
             subtitle: Text(hotel.address),

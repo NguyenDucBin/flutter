@@ -8,15 +8,13 @@ import 'package:doanflutter/features/booking/presentation/pages/booking_screen.d
 import 'package:doanflutter/features/customers/presentation/pages/customers_list_page.dart';
 import 'package:doanflutter/features/hotel/domain/entities/hotel_entity.dart';
 import 'package:doanflutter/features/hotel/presentation/pages/hotel_detail_page.dart';
-// Thay thế HotelListPage bằng UserHomePage hoặc trang tìm kiếm nếu cần
 // import 'package:doanflutter/features/hotel/presentation/pages/hotel_list_page.dart';
-import 'package:doanflutter/features/home/presentation/pages/user_home_page.dart'; // Import UserHomePage
+import 'package:doanflutter/features/home/presentation/pages/user_home_page.dart'; 
 import 'package:doanflutter/features/hotel/presentation/pages/hotel_management_page.dart';
 import 'package:doanflutter/features/reports/presentation/pages/reports_page.dart';
 import 'package:doanflutter/features/rooms/presentation/pages/rooms_list_page.dart';
 import 'package:doanflutter/features/rooms/presentation/pages/add_edit_room_page.dart';
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
-// Thêm import cho AdminHomePage nếu chưa có
 import 'package:doanflutter/features/home/presentation/pages/admin_home_page.dart';
 
 
@@ -46,8 +44,8 @@ class AppRouter {
             args.containsKey('hotelId') &&
             args.containsKey('roomId') &&
             args.containsKey('pricePerNight') &&
-            args.containsKey('checkIn') && // <-- KIỂM TRA THÊM
-            args.containsKey('checkOut')) { // <-- KIỂM TRA THÊM
+            args.containsKey('checkIn') && 
+            args.containsKey('checkOut')) { 
           return MaterialPageRoute(
             builder: (_) => BookingScreen(
               hotelId: args['hotelId'] as String,
@@ -97,10 +95,6 @@ class AppRouter {
         }
         return _errorRoute('Thiếu thông tin Hotel/Room để thêm/sửa');
 
-      // case '/customers': // Đã có trong AdminHomePage
-      //   return MaterialPageRoute(builder: (_) => const CustomersListPage());
-      // case '/reports': // Đã có trong AdminHomePage
-      //   return MaterialPageRoute(builder: (_) => const ReportsPage());
 
 
       // Route mặc định nếu không khớp

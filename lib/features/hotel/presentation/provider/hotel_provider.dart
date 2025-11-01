@@ -56,7 +56,7 @@ class HotelProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 🔹 Thêm mới: Lưu ngày nhận & trả phòng
+  //Thêm mới: Lưu ngày nhận & trả phòng
   void setDateRange(DateTime start, DateTime end) {
     startDate = start;
     endDate = end;
@@ -67,7 +67,7 @@ class HotelProvider extends ChangeNotifier {
   List<HotelEntity> get filteredHotels {
     List<HotelEntity> filtered = List<HotelEntity>.from(_allHotels);
 
-    // 1. Tên hoặc địa chỉ
+    // Tên hoặc địa chỉ
     if (_searchQuery.isNotEmpty) {
       filtered = filtered
           .where((h) =>
@@ -76,14 +76,14 @@ class HotelProvider extends ChangeNotifier {
           .toList();
     }
 
-    // 2. Giá
+    // Giá
     filtered = filtered
         .where((h) =>
             (h.minPrice >= _minPrice) &&
             (h.minPrice <= _maxPrice || _maxPrice >= 10000000.0))
         .toList();
 
-    // 3. Tiện ích
+    // Tiện ích
     if (_selectedAmenities.isNotEmpty) {
       filtered = filtered
           .where((h) =>
@@ -91,12 +91,12 @@ class HotelProvider extends ChangeNotifier {
           .toList();
     }
 
-    // 🔹 (Tuỳ chọn) sau này có thể thêm lọc theo ngày ở đây nếu có dữ liệu phòng trống
+    
 
     return filtered;
   }
 
-  // --- ACTION: FETCH ---
+  // --- Admin
   Future<void> fetchAllHotels() async {
     _isLoading = true;
     _error = null;

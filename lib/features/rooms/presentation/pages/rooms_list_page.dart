@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:doanflutter/features/rooms/presentation/provider/room_provider.dart';
-// --- THÊM IMPORT CHO RoomEntity VÀ NumberFormat ---
 import 'package:doanflutter/features/rooms/domain/entities/room_entity.dart';
 import 'package:intl/intl.dart';
-// -------------------------------------------
 
 
 class RoomsListPage extends StatefulWidget {
@@ -40,8 +38,9 @@ class _RoomsListPageState extends State<RoomsListPage> {
         ),
         centerTitle: true,
         backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white, // Thêm màu chữ cho AppBar
+        foregroundColor: Colors.white, 
       ),
+      //--admin---
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white, // Thêm màu chữ cho FAB
@@ -106,6 +105,7 @@ class _RoomsListPageState extends State<RoomsListPage> {
                                 borderRadius: BorderRadius.circular(12)),
                             margin: const EdgeInsets.symmetric(vertical: 8),
                             child: ListTile(
+
                               leading: CircleAvatar(
                                 backgroundColor:
                                     room.available ? Colors.green : Colors.redAccent,
@@ -125,6 +125,7 @@ class _RoomsListPageState extends State<RoomsListPage> {
                                 'Price: ${NumberFormat.simpleCurrency(locale: 'vi_VN', decimalDigits: 0).format(room.pricePerNight)}', // Định dạng tiền tệ
                                 style: const TextStyle(color: Colors.grey),
                               ),
+                              
                               trailing: PopupMenuButton<String>(
                                 onSelected: (value) {
                                   if (value == 'edit') {

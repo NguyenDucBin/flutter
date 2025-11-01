@@ -2,6 +2,8 @@
 import 'package:equatable/equatable.dart';
 
 class RoomEntity extends Equatable {
+
+  // Các thuộc tính của phòng
   final String roomId;
   final String hotelId;
   final String type;
@@ -10,7 +12,7 @@ class RoomEntity extends Equatable {
   final bool available;
   final List<String> imageUrls; 
   final List<String> amenities;
-
+// Constructor
   const RoomEntity({
     required this.roomId,
     required this.hotelId,
@@ -22,7 +24,7 @@ class RoomEntity extends Equatable {
     this.amenities = const [], 
   });
 
-  // Add empty factory constructor
+  // Factory tạo RoomEntity rỗng
   factory RoomEntity.empty() {
     return const RoomEntity(
       roomId: '',
@@ -38,6 +40,7 @@ class RoomEntity extends Equatable {
 
   @override
   List<Object?> get props => [
+    // Các thuộc tính dùng để so sánh 2 RoomEntity
         roomId,
         hotelId,
         type,

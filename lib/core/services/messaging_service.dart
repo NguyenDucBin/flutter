@@ -1,10 +1,9 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart'; // 👈 Thêm import
+import 'package:flutter/foundation.dart';  
 
-// 👈 THÊM HÀM NÀY (bên ngoài class)
-// Phải là top-level function để chạy ở background
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // Bạn có thể xử lý logic thông báo nền ở đây
@@ -29,7 +28,7 @@ class MessagingService {
           .set({'fcmToken': token}, SetOptions(merge: true));
     }
 
-    // 👈 THÊM CÁC HÀM LẮNG NGHE
+    // THÊM CÁC HÀM LẮNG NGHE
     _setupListeners();
   }
 

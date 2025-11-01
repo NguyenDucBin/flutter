@@ -24,7 +24,7 @@ class RoomProvider extends ChangeNotifier {
   String? get error => _error;
 
   // Helper: Lấy thông tin phòng từ ID (Trả về RoomEntity?)
-  // --- ĐÃ SỬA KIỂU TRẢ VỀ VÀ LOGIC ---
+
   RoomEntity? getRoomById(String roomId) {
     try {
       // Ưu tiên tìm trong danh sách phòng trống (cho User)
@@ -34,15 +34,13 @@ class RoomProvider extends ChangeNotifier {
       try {
         return _rooms.firstWhere((r) => r.roomId == roomId);
       } catch (e) {
-        return null; // Không tìm thấy ở cả hai danh sách
+        return null; 
       }
     }
   }
 
-  // Helper: Lấy loại phòng từ ID (dạng String)
-  // --- ĐÃ SỬA LOGIC VÀ XÓA HÀM TRÙNG ---
    String? getRoomType(String roomId) {
-    final room = getRoomById(roomId); // Sử dụng hàm getRoomById đã sửa
+    final room = getRoomById(roomId); 
     return room?.type; // Trả về type nếu room không null
   }
 
@@ -122,7 +120,7 @@ class RoomProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
+// Gọi Repository để tạo hoặc cập nhật phòng
   Future<void> createRoom(RoomEntity room) async {
     _isLoading = true;
     _error = null;

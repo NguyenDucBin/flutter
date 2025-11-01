@@ -5,7 +5,7 @@ import 'package:doanflutter/features/rooms/presentation/provider/room_provider.d
 
 class AddEditRoomPage extends StatefulWidget {
   final String hotelId;
-  final RoomEntity? room; // Nếu room là null -> Thêm mới. Ngược lại -> Cập nhật
+  final RoomEntity? room; // Null nếu thêm mới, không null nếu sửa
 
   const AddEditRoomPage({
     super.key,
@@ -25,9 +25,9 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
   late bool _isAvailable;
   bool _isLoading = false;
 
-  late final TextEditingController _imageUrlController; // Cho link ảnh
-  late List<String> _imageUrls; // Danh sách link ảnh
-  late List<String> _amenities; // Danh sách tiện ích
+  late final TextEditingController _imageUrlController; 
+  late List<String> _imageUrls; 
+  late List<String> _amenities; 
 
   // Danh sách tiện ích mẫu cho PHÒNG
   final Map<String, IconData> _allRoomAmenities = {
@@ -59,7 +59,7 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
     _typeController.dispose();
     _priceController.dispose();
     _capacityController.dispose();
-    _imageUrlController.dispose(); // Hủy controller mới
+    _imageUrlController.dispose(); 
     super.dispose();
   }
 
@@ -127,8 +127,8 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_isEditing ? 'Cập nhật Phòng' : 'Thêm Phòng Mới'),
-        backgroundColor: Colors.indigo, // Màu nhất quán
-        foregroundColor: Colors.white, // Màu chữ trên AppBar
+        backgroundColor: Colors.indigo, 
+        foregroundColor: Colors.white, 
       ),
       body: Form(
         key: _formKey,
@@ -274,13 +274,13 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
                     decoration: const InputDecoration(
                       labelText: 'Dán link ảnh (http://...)',
                       border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10), // Padding nhỏ hơn
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10), 
                     ),
                     keyboardType: TextInputType.url,
                   ),
                 ),
                 const SizedBox(width: 8),
-                IconButton.filled( // Dùng filled cho nổi bật
+                IconButton.filled( 
                   icon: const Icon(Icons.add_link),
                   onPressed: _addImageUrl,
                   style: IconButton.styleFrom(backgroundColor: Colors.indigo),
@@ -289,17 +289,17 @@ class _AddEditRoomPageState extends State<AddEditRoomPage> {
               ],
             ),
 
-            const SizedBox(height: 32), // Tăng khoảng cách
+            const SizedBox(height: 32),
             ElevatedButton(
               onPressed: _isLoading ? null : _saveRoom,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.indigo,
-                foregroundColor: Colors.white, // Màu chữ
-                minimumSize: const Size(double.infinity, 50), // Nút to hơn
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), // Bo tròn
+                foregroundColor: Colors.white, 
+                minimumSize: const Size(double.infinity, 50),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), 
               ),
               child: _isLoading
-                  ? const SizedBox( // Spinner nhỏ hơn
+                  ? const SizedBox( 
                       height: 24,
                       width: 24,
                       child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),

@@ -2,16 +2,14 @@ import 'package:equatable/equatable.dart';
 
 class HotelEntity extends Equatable {
   final String id;
-  final String ownerId; // ID của chủ khách sạn
-  final String name;
+  final String ownerId; // 
   final String address;
   final String description;
-  final List<String> imageUrls; // Danh sách link ảnh
-  final List<String> amenities; // Danh sách tiện ích (wifi, pool...)
+  final List<String> imageUrls; 
+  final List<String> amenities; 
   final double minPrice;      // Giá phòng thấp nhất
   final double avgRating;     // Điểm đánh giá trung bình
-  final int reviewCount;    // Số lượng đánh giá
-
+  final int reviewCount;    
   const HotelEntity({
     required this.id,
     required this.ownerId,

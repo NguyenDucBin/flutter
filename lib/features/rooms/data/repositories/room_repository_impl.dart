@@ -21,12 +21,11 @@ class RoomRepositoryImpl implements RoomRepository {
     DateTime checkIn,
     DateTime checkOut,
   ) async {
-    // Bước A: Lấy TẤT CẢ phòng của khách sạn
+    // Lấy TẤT CẢ phòng của khách sạn
     final allRoomsSnapshot = await _roomsCol(hotelId).get();
-    final allRooms =
-        allRoomsSnapshot.docs.map((d) => RoomModel.fromSnapshot(d)).toList();
+    final allRooms = allRoomsSnapshot.docs.map((d) => RoomModel.fromSnapshot(d)).toList();
 
-    // Bước B: Lấy TẤT CẢ các booking CÓ KHẢ NĂNG XUNG ĐỘT
+    // Lấy TẤT CẢ các booking CÓ KHẢ NĂNG XUNG ĐỘT
     // (tức là của khách sạn này VÀ có status là pending/confirmed)
     final conflictingBookingsSnapshot = await _bookingsCol
         .where('hotelId', isEqualTo: hotelId)
@@ -37,12 +36,11 @@ class RoomRepositoryImpl implements RoomRepository {
         .map((d) => BookingModel.fromSnapshot(d))
         .toList();
 
-    // Bước C & D: Lọc trong Dart
+    //Lọc trong Dart
     final availableRooms = <RoomEntity>[];
 
     for (final room in allRooms) {
-      bool isAvailable = true; // Giả sử phòng trống
-
+      bool isAvailable = true; 
       // Tìm các booking của CHỈ RIÊNG phòng này
       final bookingsForThisRoom =
           conflictingBookings.where((b) => b.roomId == room.roomId);

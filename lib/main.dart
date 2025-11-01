@@ -189,7 +189,7 @@ class AppEntry extends StatelessWidget {
 
       // MaterialApp sẽ là con của MultiProvider
       child: MaterialApp(
-        title: 'Hotel Booking (Clean Architecture)',
+        title: 'Hotel Booking App',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           // Đổi màu chủ đạo cho nhất quán

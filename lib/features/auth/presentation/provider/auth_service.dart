@@ -12,10 +12,11 @@ import 'package:provider/provider.dart';
 // AuthService bây giờ là Provider quản lý trạng thái,
 // nó sử dụng AuthRepository để thực hiện hành động.
 class AuthService extends ChangeNotifier {
+  // Các dependency cần thiết
   final AuthRepository _authRepository;
   final MessagingService _messagingService;
   StreamSubscription<UserEntity?>? _userSubscription;
-
+// Trạng thái hiện tại của user
   UserEntity? _user;
   UserEntity? get user => _user;
 
@@ -80,7 +81,7 @@ class AuthService extends ChangeNotifier {
         name: name,
         email: email,
         password: password,
-        // role: role, // <-- ĐÃ XÓA
+        // role: role, // Bỏ tham số role
       );
       // Stream sẽ tự động cập nhật
     } catch (e) {
